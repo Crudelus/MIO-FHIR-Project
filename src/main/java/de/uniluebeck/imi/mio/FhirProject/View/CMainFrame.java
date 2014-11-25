@@ -1,6 +1,16 @@
 package de.uniluebeck.imi.mio.FhirProject.View;
 
-public class CMainFrame 
+import javax.swing.JFrame;
+
+public class CMainFrame extends JFrame
 {
+	public CMainFrame()
+	{
+		
+	}
 	
+	private void initComponents()
+	{
+		
+	}
 }
