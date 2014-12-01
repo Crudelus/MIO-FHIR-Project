@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>de.uniluebeck.imi.mio</groupId>
-  <artifactId>FhirProject</artifactId>
+  <artifactId>fhirProject</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>FhirProject</name>
+  <name>fhirProject</name>
   <url>http://maven.apache.org</url>
 
   <properties>
