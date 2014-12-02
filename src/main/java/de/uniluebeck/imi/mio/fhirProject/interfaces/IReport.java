@@ -5,6 +5,7 @@ import java.util.List;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.IGenericClient;
 
 
 /**
@@ -19,46 +20,46 @@ public interface IReport
 	 * 
 	 * @return A list of all reports which are connected with a patient. It is possible that this list is empty.
 	 */
-	public List<DiagnosticReport> getAllPatientReports(IdDt patient);
+	public List<DiagnosticReport> getAllPatientReports(IGenericClient client, IdDt patient);
 		
 	/**
 	 * 
 	 * @return
 	 */
-	public MethodOutcome createNewReport();
+	public MethodOutcome createNewReport(IGenericClient client);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public DiagnosticReport getReport(IdDt report);
+	public DiagnosticReport getReport(IGenericClient client,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public boolean updateReport(IdDt report, DiagnosticReport newReport);
+	public boolean updateReport(IGenericClient client,IdDt report, DiagnosticReport newReport);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public boolean deleteReport(IdDt report);
+	public boolean deleteReport(IGenericClient client,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public DiagnosticReport getVRead(IdDt report);
+	public DiagnosticReport getVRead(IGenericClient client,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return A string, which represents the report in XML style.
 	 */
-	public String getXMLString(IdDt report);
+	public String getXMLString(IGenericClient client, IdDt report);
 }
