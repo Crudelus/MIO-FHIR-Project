@@ -12,6 +12,7 @@ public class App
     public static void main( String[] args )
     {
 	MIODeviceSystem mioDev=new MIODeviceSystem();
-	mioDev.deleteDevice(new IdDt("Device/daniel"));
+	//mioDev.createBasicInfrastructure();
+	mioDev.updateDeviceLocation(new IdDt("Device",  "5923"), new IdDt("Location", "4875"));
     }
 }
