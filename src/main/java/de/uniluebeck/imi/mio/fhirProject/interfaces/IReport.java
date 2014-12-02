@@ -36,4 +36,6 @@ public interface IReport
 	 */
 	public List<CReport> getAllReports();
 	
+	
+	
 }
