@@ -17,18 +17,27 @@ public class CMainWindow extends JFrame
 		super(name);
 		initComponents();
 		addComponents();
+		
+		//After this comment, please, do NOTHING!! Until the method is finished!
+		this.setVisible(true);
 	}
 	
 	private void initComponents()
 	{
 		this.centerPanel = new JPanel();
 		this.allPatientsTable = new JTable();
+		this.addMenu();
 		
 	}
 	
 	private void addComponents()
 	{
 		
+	}
+	
+	private void addMenu()
+	{
+		this.setJMenuBar(new CMenu().getMenu());
 	}
 	
 	/*
