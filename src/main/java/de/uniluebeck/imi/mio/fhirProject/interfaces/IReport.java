@@ -2,8 +2,10 @@ package de.uniluebeck.imi.mio.fhirProject.interfaces;
 
 import java.util.List;
 
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.primitive.IdDt;
-import de.uniluebeck.imi.mio.fhirProject.report.CReport;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+
 
 /**
  * 
@@ -12,30 +14,51 @@ import de.uniluebeck.imi.mio.fhirProject.report.CReport;
  */
 public interface IReport
 {
-	/**
-	 * 
-	 * @return A representation of the report as an XMLString
-	 */
-	public String getXMLReport();
-	
-	/**
-	 * 
-	 * @return A repesentation of the report as an JSONString
-	 */
-	public String getJSONReport();
 	
 	/**
 	 * 
 	 * @return A list of all reports which are connected with a patient. It is possible that this list is empty.
 	 */
-	public List<CReport> getAllPatientReports(IdDt patient);
+	public List<DiagnosticReport> getAllPatientReports(IdDt patient);
+		
+	/**
+	 * 
+	 * @return
+	 */
+	public MethodOutcome createNewReport();
 	
 	/**
 	 * 
-	 * @return 
+	 * @param report
+	 * @return
 	 */
-	public List<CReport> getAllReports();
+	public DiagnosticReport getReport(IdDt report);
 	
+	/**
+	 * 
+	 * @param report
+	 * @return
+	 */
+	public boolean updateReport(IdDt report, DiagnosticReport newReport);
 	
+	/**
+	 * 
+	 * @param report
+	 * @return
+	 */
+	public boolean deleteReport(IdDt report);
 	
+	/**
+	 * 
+	 * @param report
+	 * @return
+	 */
+	public DiagnosticReport getVRead(IdDt report);
+	
+	/**
+	 * 
+	 * @param report
+	 * @return
+	 */
+	public String getXMLString(IdDt report);
 }
