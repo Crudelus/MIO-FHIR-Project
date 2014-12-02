@@ -1,4 +1,4 @@
-package de.uniluebeck.imi.mio.FhirProject;
+package de.uniluebeck.imi.mio.fhirProject;
 
 /**
  * Hello world!

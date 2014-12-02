@@ -1,4 +1,4 @@
-package de.uniluebeck.imi.mio.FhirProject.View;
+package de.uniluebeck.imi.mio.fhirProject.view;
 import javax.swing.JFrame;
 
 public class CAddReport extends JFrame
