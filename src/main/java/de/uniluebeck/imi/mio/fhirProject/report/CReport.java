@@ -1,4 +1,4 @@
-package de.uniluebeck.deimi.mio.FhirProject.Report;
+package de.uniluebeck.imi.mio.fhirProject.report;
 
 public class CReport 
 {
