@@ -58,7 +58,7 @@ public interface IReport
 	/**
 	 * 
 	 * @param report
-	 * @return
+	 * @return A string, which represents the report in XML style.
 	 */
 	public String getXMLString(IdDt report);
 }
