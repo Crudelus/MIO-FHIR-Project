@@ -23,7 +23,7 @@ public interface IDevice {
     
     
     /**
-     * @param deviceId reference ID for a device
+     * @param deviceId reference ID for device
      * @return a ca.uhn.fhir.model.dstu.resource.Device or null if Device not found on server
      */
     public Device getDevice(IdDt deviceId);
@@ -46,5 +46,12 @@ public interface IDevice {
      * @return true if Patient has Devices affixed to, else false
      */
     public boolean PatientHasDevice(IdDt patId);
+    
+    /**
+     * @param devID reference ID for device
+     * @param locID reference ID for location
+     * @return true if updated, else false
+     */
+    public boolean updateDeviceLocation(IdDt devID, IdDt locID);
     
 }
