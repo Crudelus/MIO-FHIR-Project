@@ -39,8 +39,10 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	@Override
 	public Admission admitPatient(PatientCreationParameters patient,
 			AdmissionParameters parameters) {
+	    
+	    return new MyEntering(client, ctx, patParams, admParams).getAdmission();
 		// TODO Auto-generated method stub
-		return null;
+//		return null;
 	}
 
 	@Override
