@@ -24,7 +24,7 @@ public interface IDevice {
     
     /**
      * @param deviceId reference ID for a device
-     * @return a ca.uhn.fhir.model.dstu.resource.Device
+     * @return a ca.uhn.fhir.model.dstu.resource.Device or null if Device not found on server
      */
     public Device getDevice(IdDt deviceId);
     
