@@ -2,6 +2,7 @@ package de.uniluebeck.imi.mio.fhirProject.interfaces;
 
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -20,46 +21,46 @@ public interface IReport
 	 * 
 	 * @return A list of all reports which are connected with a patient. It is possible that this list is empty.
 	 */
-	public List<DiagnosticReport> getAllPatientReports(IGenericClient client, IdDt patient);
+	public List<DiagnosticReport> getAllPatientReports(FhirContext ctx, IdDt patient);
 		
 	/**
 	 * 
 	 * @return
 	 */
-	public MethodOutcome createNewReport(IGenericClient client);
+	public MethodOutcome createNewReport(FhirContext ctx);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public DiagnosticReport getReport(IGenericClient client,IdDt report);
+	public DiagnosticReport getReport(FhirContext ctx,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public boolean updateReport(IGenericClient client,IdDt report, DiagnosticReport newReport);
+	public boolean updateReport(FhirContext ctx,IdDt report, DiagnosticReport newReport);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public boolean deleteReport(IGenericClient client,IdDt report);
+	public boolean deleteReport(FhirContext ctx,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return
 	 */
-	public DiagnosticReport getVRead(IGenericClient client,IdDt report);
+	public DiagnosticReport getVRead(FhirContext ctx,IdDt report);
 	
 	/**
 	 * 
 	 * @param report
 	 * @return A string, which represents the report in XML style.
 	 */
-	public String getXMLString(IGenericClient client, IdDt report);
+	public String getXMLString(FhirContext ctx, IdDt report);
 }
