@@ -1,5 +1,7 @@
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
+import java.util.ArrayList;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
@@ -9,6 +11,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class ServerCommunication {
 	private IGenericClient client;
+	private ArrayList<IdDt> generatedObjects = new ArrayList<IdDt>();
 
 	public ServerCommunication(FhirContext ctx, String serverBase) {
 		this.client = ctx.newRestfulGenericClient(serverBase);
@@ -23,6 +26,8 @@ public class ServerCommunication {
 	public MethodOutcome createDeviceOnServer(Device device) {
 		MethodOutcome outcome = client.create().resource(device).prettyPrint()
 				.encodedJson().execute();
+		
+		generatedObjects.add(outcome.getId());
 		return outcome;
 	}
 
@@ -63,6 +68,13 @@ public class ServerCommunication {
 			System.err.println("delete failed");
 			e.printStackTrace();
 			return false;
+		}
+	}
+	
+	public void deleteAll(){
+		for (IdDt id: generatedObjects ){
+
+			deleteDevice(id);
 		}
 	}
 

@@ -3,6 +3,7 @@
  */
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.naming.Reference;
@@ -106,11 +107,28 @@ public class MIODeviceSystem implements IDevice {
 	public void setServerBase(String base) {
 		this.serverBase = base;
 	}
+	
+	
+	public boolean setPatient(IdDt devID, IdDt patID){
+		
+		Device dev = communicator.getDevice(devID);
+		dev.setPatient(new ResourceReferenceDt(patID));
+		return communicator.updateDevice(dev);
+		
+	}
 
 	@Override
 	public boolean updateDeviceLocation(IdDt devID, IdDt locID) {
 		Device dev = communicator.getDevice(devID);
 		dev.setLocation(new ResourceReferenceDt(locID));
 		return communicator.updateDevice(dev);
+	}
+	public void delAll(){
+		communicator.deleteAll();
+	}
+	public boolean delDev(String id){
+		IdDt deviceId = new IdDt("Device",id);
+		communicator.deleteDevice(deviceId);
+		return true;
 	}
 }
