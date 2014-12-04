@@ -10,6 +10,9 @@ import java.util.List;
 import javax.naming.Reference;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
@@ -24,7 +27,7 @@ import ca.uhn.fhir.rest.gclient.IDelete;
 
 /**
  * @author Daniel Rehmann, Simon Baumhof
- *
+ * 
  */
 public class MIODeviceSystem implements IDevice {
 	private String serverBase = "http://fhirtest.uhn.ca/base";
@@ -109,14 +112,13 @@ public class MIODeviceSystem implements IDevice {
 	public void setServerBase(String base) {
 		this.serverBase = base;
 	}
-	
-	
-	public boolean setPatient(IdDt devID, IdDt patID){
-		
+
+	public boolean setPatient(IdDt devID, IdDt patID) {
+
 		Device dev = communicator.getDevice(devID);
 		dev.setPatient(new ResourceReferenceDt(patID));
 		return communicator.updateDevice(dev);
-		
+
 	}
 
 	@Override
@@ -125,22 +127,42 @@ public class MIODeviceSystem implements IDevice {
 		dev.setLocation(new ResourceReferenceDt(locID));
 		return communicator.updateDevice(dev);
 	}
-	public void delAll(){
+
+	public void delAll() {
 		communicator.deleteAll();
 	}
-	public boolean delDev(String id){
-		IdDt deviceId = new IdDt("Device",id);
+
+	public boolean delDev(String id) {
+		IdDt deviceId = new IdDt("Device", id);
 		communicator.deleteDevice(deviceId);
 		return true;
 	}
-	public ResourceReferenceDt getDeviceLocation(IdDt devId){
-	    Device dev = communicator.getDevice(devId);
-	    return dev.getLocation();
+
+	public ResourceReferenceDt getDeviceLocation(IdDt devId) {
+		Device dev = communicator.getDevice(devId);
+		return dev.getLocation();
 	}
-	
-	
-	public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(IdDt patId){
-//	    communicator.getObservationForPatient(patId); //TODO
-	    return null;
+
+	public DeviceObservationReport[] getDeviceObservationReportsForPatient(
+			IdDt patId) {
+		List<BundleEntry> obsRepForPat = communicator.getObservationForPatient(
+				patId).getEntries();
+		int numberOfRep = obsRepForPat.size();
+		return obsRepForPat.toArray(new DeviceObservationReport[numberOfRep]);
+
+	}
+
+	public ArrayList<DeviceAndTimeForPatient> getDeviceAndTimeForPatient(
+			DeviceObservationReport[] obsRepForPat) {
+
+		ArrayList<DeviceAndTimeForPatient> devicesForPat = new ArrayList<DeviceAndTimeForPatient>();
+
+		for (DeviceObservationReport report : obsRepForPat) {
+
+			devicesForPat.add(new DeviceAndTimeForPatient(report.getInstant()
+					.getValue(), report.getSource().getReference()));
+		}
+
+		return devicesForPat;
 	}
 }

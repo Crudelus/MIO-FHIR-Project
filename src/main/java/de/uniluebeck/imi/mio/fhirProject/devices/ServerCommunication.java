@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
@@ -29,7 +30,7 @@ public class ServerCommunication {
 	public MethodOutcome createDeviceOnServer(Device device) {
 		MethodOutcome outcome = client.create().resource(device).prettyPrint()
 				.encodedJson().execute();
-		
+
 		generatedObjects.add(outcome.getId());
 		return outcome;
 	}
@@ -44,7 +45,8 @@ public class ServerCommunication {
 	}
 
 	/**
-	 * @param device the device
+	 * @param device
+	 *            the device
 	 * @return true if updated, else false
 	 */
 	public boolean updateDevice(Device device) {
@@ -73,13 +75,20 @@ public class ServerCommunication {
 			return false;
 		}
 	}
-	
-	public void deleteAll(){
-		for (IdDt id: generatedObjects ){
+
+	public void deleteAll() {
+		for (IdDt id : generatedObjects) {
 
 			deleteDevice(id);
 		}
 	}
 
+
+
+	public Bundle getObservationForPatient(IdDt patId) {
+
+		return client.search().forResource(DeviceObservationReport.class)
+				.where(DeviceObservationReport.SUBJECT.hasId(patId)).execute();
+	}
 
 }
