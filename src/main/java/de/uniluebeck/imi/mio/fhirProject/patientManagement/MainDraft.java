@@ -1,71 +1,85 @@
-package de.uniluebeck.imi.mio.fhirProject.patientManagement;
+package patientManagement;
 
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class MainDraft
 {
-    String serverBase = "http://fhirtest.uhn.ca/base";
+	public static void main(String[] args)
+	{
+		String serverBase = "http://fhirtest.uhn.ca/base";
 
-    // Server infrastructure:
-    FhirContext context = new FhirContext();
-    IGenericClient client = context.newRestfulGenericClient(serverBase);
+	    // Server infrastructure:
+	    FhirContext context = new FhirContext();
+	    IGenericClient client = context.newRestfulGenericClient(serverBase);
 
-    // Create and initialize 
-    IPatientManagementSystem patientManagement = new PatientManagementSystem(context, client);
+	    // Create and initialize 
+	    IPatientManagementSystem patientManagement = new PatientManagementSystem(context, client);
+	    
+	    // Scenario:   
+	    // Get parameters for patient admission
+	    Organization birthStation = patientManagement.getBirthStation();
+	            
+	    // Admit patient (creates encounter, hospitalization, composition etc)
+	    PatientCreationParameters scenarioPatientParameters = null;// < Fill with GUI or terminal input> 
+	    AdmissionParameters admissionParameters = null; // < Fill with GUI or terminal input> 
+	    AdmissionContainer scenarioAdmission = patientManagement.admitPatient(scenarioPatientParameters, admissionParameters);	
 
-    // Scenario:   
-    // Get parameters for patient admission
-    Organization birthStation = patientManagement.getBirthStation();
-            
-    // Admit patient (creates encounter, hospitalization, composition etc)
-    PatientCreationParameters scenarioPatientParameters;// < Fill with GUI or terminal input> 
-    AdmissionParameters admissionParameters; // < Fill with GUI or terminal input> 
-    Admission scenarioAdmission = patientManagement.admitPatient(scenarioPatientParameters, admissionParameters);	
+	    Patient scenarioPatient = scenarioAdmission.patient;
+	    
 
-    Patient scenarioPatient = scenarioAdmission.patient;
+	    // Group 1: Create observation for patient, get nurse [Maybe reference for practitioner would suffice?]
+	    // encounter is known from admission result 
+	    List<Practitioner> practitioners = patientManagement.getNurses();
+	        
+	    // Create child
+	    PatientCreationParameters childPatientParameters = null; // < Fill with GUI or terminal input> 
+	    AdmissionParameters childAdmissionParameters = null; // < Fill with GUI or terminal input> 
+	    AdmissionContainer childAdmission = patientManagement.admitPatient(childPatientParameters, childAdmissionParameters);	
+	    
+	    // Work-in-progress:
+	    
+	    
+	    
+	    // Transfer scenarioPatient
+	    ResourceReferenceDt imcReference = new ResourceReferenceDt(patientManagement.getIMC());
+	    long durationIMC = 0; // < Fill with GUI or terminal input>
+	    String diagnosisICD = null; // < Fill with GUI or terminal input>
+	    String diagnosisDescription = null; // < Fill with GUI or terminal input>
 
-    // Group 1: Create observation for patient, get nurse [Maybe reference for practitioner would suffice?]
-    // encounter is known from admission result 
-    List<Practitioner> practitioners = patientManagement.getNurses();
-        
-    // Create child
-    PatientCreationParameters childPatientParameters; // < Fill with GUI or terminal input> 
-    AdmissionParameters childAdmissionParameters; // < Fill with GUI or terminal input> 
-    Admission childAdmission = patientManagement.admitPatient(childPatientParameters, childAdmissionParameters);	
+	   patientManagement.transferPatient(scenarioAdmission, imcReference, durationIMC, diagnosisICD, diagnosisDescription);
+	    
+	    
+	    // Discharge both, use admission as input so that encounter can be used directly
+	    patientManagement.dischargePatient(scenarioAdmission);
+	    patientManagement.dischargePatient(childAdmission);
+
+	    // Divorce of patient
+	    scenarioPatient.setMaritalStatus(MaritalStatusCodesEnum.D);
+	    patientManagement.updatePatient(scenarioPatient);
+
+	    // Readmission
+	    AdmissionParameters secondAdmissionParameters = null; // < Fill with GUI or terminal input> 
+	    AdmissionContainer secondAdmission = patientManagement.admitPatient(scenarioPatientParameters, secondAdmissionParameters);	
+
+	    // Get previous encounters
+	    List<Encounter> encounterList = patientManagement.getAllPatientEncounters(scenarioPatient);    
+		
+	    // At end of scenario:
+	    // Clean infrastructure from server
+	    patientManagement.clearEntries();
+	  
+	}
     
-    // Work-in-progress:
-    /*
-    // Transfer scenarioPatient
-    Organization imc = patientManagement.getIMC();
-    String durationIMC = new String(); // < Fill with GUI or terminal input> 
-        
-    patientManagement.transferPatient(scenarioPatient, imc, durationIMC);
-    
-    // Discharge both, use admission as input so that encounter can be used directly
-    patientManagement.dischargePatient(scenarioAdmission);
-    patientManagement.dischargePatient(childAdmission);
-
-    // Divorce of patient
-    scenarioPatient.setMaritalStatus(MaritalStatusCodesEnum.S);
-    patientManagement.updatePatient(scenarioPatient);
-
-    // Readmission
-    AdmissionParameters secondAdmissionParameters; // < Fill with GUI or terminal input> 
-    Admission secondAdmission = patientManagement.admitPatient(scenarioPatientParameters, secondAdmissionParameters);	
-
-    // Get previous encounters
-    List<Encounter> getAllPatientEncounters(scenarioPatient);    
-	
-    // At end of scenario:
-    // Clean infrastructure from server
-    patientManagement.clearEntries();
-    */
 }
 
 /*

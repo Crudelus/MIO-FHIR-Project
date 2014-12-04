@@ -1,4 +1,4 @@
-package de.uniluebeck.imi.mio.fhirProject.patientManagement;
+package patientManagement;
 
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
