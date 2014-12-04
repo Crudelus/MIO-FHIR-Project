@@ -1,10 +1,13 @@
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -77,5 +80,6 @@ public class ServerCommunication {
 			deleteDevice(id);
 		}
 	}
+
 
 }

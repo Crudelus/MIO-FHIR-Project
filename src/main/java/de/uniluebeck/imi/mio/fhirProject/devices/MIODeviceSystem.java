@@ -4,6 +4,7 @@
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.Reference;
@@ -11,6 +12,7 @@ import javax.naming.Reference;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
@@ -130,5 +132,15 @@ public class MIODeviceSystem implements IDevice {
 		IdDt deviceId = new IdDt("Device",id);
 		communicator.deleteDevice(deviceId);
 		return true;
+	}
+	public ResourceReferenceDt getDeviceLocation(IdDt devId){
+	    Device dev = communicator.getDevice(devId);
+	    return dev.getLocation();
+	}
+	
+	
+	public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(IdDt patId){
+//	    communicator.getObservationForPatient(patId); //TODO
+	    return null;
 	}
 }
