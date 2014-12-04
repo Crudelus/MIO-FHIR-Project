@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.IGenericClient;
 import de.uniluebeck.imi.mio.fhirProject.interfaces.IReport;
 
 public class CReportManagmentSystem implements IReport
