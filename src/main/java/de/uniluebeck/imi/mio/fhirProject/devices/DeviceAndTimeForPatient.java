@@ -14,4 +14,20 @@ public class DeviceAndTimeForPatient {
 		this.device = device;
 	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public IdDt getDevice() {
+		return device;
+	}
+
+	public void setDevice(IdDt device) {
+		this.device = device;
+	}
+
 }
