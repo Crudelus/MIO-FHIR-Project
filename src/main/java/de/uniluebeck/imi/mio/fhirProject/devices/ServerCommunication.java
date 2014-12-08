@@ -91,10 +91,18 @@ public class ServerCommunication {
 	}
     }
 
-    public Bundle getObservationForPatient(IdDt patId) {
-
-	return client.search().forResource(DeviceObservationReport.class)
+    public ArrayList<DeviceObservationReport> getObservationForPatient(IdDt patId) {
+    	
+    	ArrayList<DeviceObservationReport> obsForPat = new ArrayList<>();
+    	
+    	Bundle bundle = client.search().forResource(DeviceObservationReport.class)
 		.where(DeviceObservationReport.SUBJECT.hasId(patId)).execute();
+    	
+    	while(!bundle.getLinkNext().isEmpty()){
+		    bundle = client.loadPage().next(bundle).execute();
+		    obsForPat.addAll(bundle.getResources(DeviceObservationReport.class));
+		}	
+	return obsForPat;
     }
 
     /**
@@ -114,8 +122,11 @@ public class ServerCommunication {
 	while (!toCheck.isEmpty()){
 	    ArrayList<Organization> temp= new ArrayList<Organization>();
 	    for(Organization inHospital : toCheck){
+	    	
 		Bundle bundle=client.search().forResource(Organization.class).where(Organization.PARTOF.hasId(inHospital.getId())).execute();
 		temp.addAll(bundle.getResources(Organization.class));
+		
+		
 		
 		while(!bundle.getLinkNext().isEmpty()){
 		    bundle = client.loadPage().next(bundle).execute();
@@ -123,6 +134,7 @@ public class ServerCommunication {
 		}		
 	    }
 	    partOfHospital.addAll(toCheck);
+	    System.out.println(partOfHospital.size());
 	    toCheck.clear();
 	    toCheck.addAll(temp);
 	    toCheck.removeAll(partOfHospital);	    

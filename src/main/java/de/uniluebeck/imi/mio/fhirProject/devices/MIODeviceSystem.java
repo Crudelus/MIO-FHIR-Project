@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -135,12 +136,12 @@ public class MIODeviceSystem implements IDevice {
      * @param patId
      * @return
      */
-    public DeviceObservationReport[] getDeviceObservationReportsForPatient(
+    public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(
 	    IdDt patId) {
-	List<BundleEntry> obsRepForPat = communicator.getObservationForPatient(
-		patId).getEntries();
-	int numberOfRep = obsRepForPat.size();
-	return obsRepForPat.toArray(new DeviceObservationReport[numberOfRep]);
+    	
+    	return communicator.getObservationForPatient(
+		patId);
+
 
     }
 
@@ -149,7 +150,7 @@ public class MIODeviceSystem implements IDevice {
      * @return
      */
     public ArrayList<DeviceAndTimeForPatient> getDeviceAndTimeForPatient(
-	    DeviceObservationReport[] obsRepForPat) {
+	    ArrayList<DeviceObservationReport> obsRepForPat) {
 
 	ArrayList<DeviceAndTimeForPatient> devicesForPat = new ArrayList<DeviceAndTimeForPatient>();
 
