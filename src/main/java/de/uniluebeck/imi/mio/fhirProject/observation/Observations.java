@@ -67,8 +67,9 @@ public class Observations implements IObservation {
 	public boolean changeMaritialStatus(Patient patient,
 			MaritalStatusCodesEnum mariage) {
 		// TODO Auto-generated method stub
- 
-		return false;
+		patient.setMaritalStatus(mariage);
+		
+		return true;
 	}
 
 	public boolean dischargePatient(AdmissionContainer adCont) {
@@ -80,6 +81,9 @@ public class Observations implements IObservation {
 			ResourceReferenceDt targetOrganizationReference, long duration,
 			String diagnosisICD, String diagnosisDescription) {
 		// TODO Auto-generated method stub
+		 
+		patientManagement.transferPatient(scenarioAdmission, imcReference, durationIMC, diagnosisICD, diagnosisDescription);
+		
 		return false;
 	}
 
