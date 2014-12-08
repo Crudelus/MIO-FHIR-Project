@@ -2,8 +2,12 @@ package de.uniluebeck.imi.mio.fhirProject;
 
 import java.util.Scanner;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.primitive.IdDt;
 import de.uniluebeck.imi.mio.fhirProject.devices.MIODeviceSystem;
+import de.uniluebeck.imi.mio.fhirProject.devices.ServerCommunication;
 
 /**
  * Hello world!
@@ -13,11 +17,27 @@ public class App
 {
     public static void main( String[] args )
     {
-	MIODeviceSystem mioDev=new MIODeviceSystem();
-	mioDev.createBasicInfrastructure();
+	FhirContext ctx = new FhirContext(); // TODO should be the same in every
+	
+//	MIODeviceSystem mioDev=new MIODeviceSystem("http://fhirtest.uhn.ca/base",ctx,null);
+//	mioDev.createBasicInfrastructure();
+	
 	Scanner scan = new Scanner(System.in);
+//	mioDev.getHospitalDevices();
+	
+	ServerCommunication serv= new ServerCommunication(ctx, "http://fhirtest.uhn.ca/base", new ResourceReferenceDt(new IdDt("Organization", "6000")));
+	
+	serv.getAllDevices();
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	String wait = scan.next();
-	mioDev.delAll();
-//	mioDev.delDev("5950");
+//	mioDev.delAll();
     }
 }

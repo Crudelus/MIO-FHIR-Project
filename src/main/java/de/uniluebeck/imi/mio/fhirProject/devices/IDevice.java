@@ -15,12 +15,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
  */
 public interface IDevice {
 
-    /**
-     * @param udi FDA mandated unique Device ID
-     * @return a ca.uhn.fhir.model.dstu.resource.Device 
-     */
-    public Device getDevice(String udi);
-    
     
     /**
      * @param deviceId reference ID for device
