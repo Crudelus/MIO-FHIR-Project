@@ -74,17 +74,20 @@ public class Observations implements IObservation {
 
 	public boolean dischargePatient(AdmissionContainer adCont) {
 		// TODO Auto-generated method stub
+		patientManagement.dischargePatient(adCont);
 		return false;
 	}
 
+	
 	public boolean transferPatient(AdmissionContainer admission,
 			ResourceReferenceDt targetOrganizationReference, long duration,
 			String diagnosisICD, String diagnosisDescription) {
 		// TODO Auto-generated method stub
+		ResourceReferenceDt imcReference = new ResourceReferenceDt(patientManagement.getIMC());
 		 
-		patientManagement.transferPatient(scenarioAdmission, imcReference, durationIMC, diagnosisICD, diagnosisDescription);
+		patientManagement.transferPatient(admission, imcReference, duration, diagnosisICD, diagnosisDescription);
 		
-		return false;
+		return true;
 	}
 
 }
