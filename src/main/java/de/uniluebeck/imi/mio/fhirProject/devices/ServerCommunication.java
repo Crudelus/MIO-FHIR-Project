@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -105,6 +106,13 @@ public class ServerCommunication {
 	return obsForPat;
     }
 
+    public void wennDasFunzt(){
+	Organization hospital = client.read(Organization.class,hospitalId.getReference());
+	Bundle bundle=client.search().forResource(Device.class).where(Device.ORGANIZATION.hasChainedProperty(Organization.PARTOF.hasId(hospitalId.getElementSpecificId()))).execute();
+	System.out.println(bundle.size());
+    }
+    
+    
     /**
      * @return
      */
@@ -134,14 +142,12 @@ public class ServerCommunication {
 		}		
 	    }
 	    partOfHospital.addAll(toCheck);
-	    System.out.println(partOfHospital.size());
 	    toCheck.clear();
 	    toCheck.addAll(temp);
 	    toCheck.removeAll(partOfHospital);	    
 	}
 	
-	
-	//DIE GANZE SCHEI?E FUNZT NICHT !!!!!!!!!!einself!
+	//TODO: get Devices for the Organizations
 	return null;
 	
 	

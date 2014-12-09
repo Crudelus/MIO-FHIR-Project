@@ -15,6 +15,7 @@ import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
 /**
  * @author Daniel Rehmann, Simon Baumhof, Katharina Merkel
@@ -23,15 +24,18 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class MIODeviceSystem implements IDevice {
     FhirContext ctx;
     private ServerCommunication communicator;
+    ResourceReferenceDt hospital;
 
     /**
      * @param serverBase
      * @param ctx
+     * @param hospital 
      */
     public MIODeviceSystem(String serverBase, FhirContext ctx, ResourceReferenceDt hospital ) {
 	this.ctx = ctx;
 	communicator = new ServerCommunication(ctx,
 		    serverBase, hospital);
+	this.hospital=hospital;
 
     }
 
@@ -39,13 +43,17 @@ public class MIODeviceSystem implements IDevice {
 	// Location locToko = new Location().setName("Geburtsstation"); //TODO
 	// location korrekt über Gruppe 2 abfragen
 //	Device tokometer = new Device();
-//	tokometer.setUdi("Tokometer1");
+//	tokometer.setUdi("Tokometer2");
+//	tokometer.setOwner(new ResourceReferenceDt(new IdDt("Organization","6010")));
+//	communicator.createRessourceOnServer(tokometer);
 //	communicator.createRessourceOnServer(tokometer);
 //	Organization mio = new Organization().addIdentifier("Daniels", "1").setName("MIO-KH");
-//	Organization gs = new Organization().addIdentifier("Daniels", "2").setName("Geburtsstation").setPartOf(new ResourceReferenceDt(mio));
-//	Organization hannes = new Organization().addIdentifier("Daniels", "3").setName("Hallo Hannes").setPartOf(new ResourceReferenceDt(gs));
-//	communicator.createRessourceOnServer(mio);
-//	communicator.createRessourceOnServer(gs);
+//	Organization gs = new Organization().addIdentifier("Daniels", "2").setName("Geburtsstation");
+//	Organization hannes = new Organization().addIdentifier("Daniels", "3").setName("Hallo Hannes");
+//	MethodOutcome returned = communicator.createRessourceOnServer(mio);
+//	gs.setPartOf(new ResourceReferenceDt(returned.getId()));
+//	returned=communicator.createRessourceOnServer(gs);
+//	hannes.setPartOf(new ResourceReferenceDt(returned.getId()));
 //	communicator.createRessourceOnServer(hannes);
     }
 
@@ -166,7 +174,7 @@ public class MIODeviceSystem implements IDevice {
     public List<Device> getHospitalDevices() {
 	List<Device> devices = communicator.getAllDevices();
 
-	return null;
+	return devices;
     }
 
 }
