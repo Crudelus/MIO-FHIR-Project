@@ -29,7 +29,7 @@ public class App
 	
 	ServerCommunication serv= new ServerCommunication(ctx, "http://fhirtest.uhn.ca/base", new ResourceReferenceDt(new IdDt("Organization", "6009")));
 	
-	serv.wennDasFunzt();
+	serv.getAllDevices();
 	
 	
 	
