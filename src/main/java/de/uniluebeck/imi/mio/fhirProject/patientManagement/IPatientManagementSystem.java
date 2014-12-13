@@ -11,7 +11,8 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 public interface IPatientManagementSystem {
 	
     // Plan encounters
-    public boolean planEncounter(ResourceReferenceDt patientReference, String diagnosisICD, ResourceReferenceDt stationReference);
+	public AdmissionContainer planAdmission(PatientCreationParameters patientParameters, 
+		 						AdmissionParameters admissionParameters);
 	
 	  // Get the two relevant stations [references?]
     public Organization getBirthStation();
@@ -20,8 +21,13 @@ public interface IPatientManagementSystem {
 	// Admit a new patient:
     //  -Creates patient according to parameters if necessary
     //  -Creates main Encounter and Hospitalization for patient
-	public AdmissionContainer admitPatient(PatientCreationParameters patient, AdmissionParameters parameters);	
+	public AdmissionContainer admitPatient(AdmissionContainer admissionContainer,
+											PatientCreationParameters patient,
+											AdmissionParameters parameters,
+											boolean planned);	
 
+	
+	
     // Get all nurses [references?]
     public List<Practitioner> getNurses();
 	
@@ -41,11 +47,6 @@ public interface IPatientManagementSystem {
 			String diagnosisICD,
 			String diagnosisDescription);	
 
-    // Get all previous main encounters for a patient
-    public List<Encounter> getAllPatientEncounters(Patient patient);
-    
-
-    
     // Remove all infrastructure and default entries
     public void clearEntries();	
 }

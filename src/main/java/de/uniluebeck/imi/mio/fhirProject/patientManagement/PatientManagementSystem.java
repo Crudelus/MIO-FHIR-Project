@@ -13,15 +13,20 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu.resource.Encounter.Hospitalization;
 import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
-
-// Absolutely work-in-progress!
 public class PatientManagementSystem implements IPatientManagementSystem{
 
 	private FhirContext context;
 	private IGenericClient client;
+	
 	private InfrastructureCreation infrastructure;
+	private PatientCreation patientCreation;
+	private DoctorCreation doctorCreation;
+	private NurseCreation nurseCreation;
+	
+	private IdDt hospitalID;
 	
 	public PatientManagementSystem(FhirContext inContext, IGenericClient inClient)
 	{
@@ -31,64 +36,96 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		//Create default infrastructure
 		infrastructure = new InfrastructureCreation(inContext, inClient);
 		
-		//TODO Set global ID for hospital.
+		// Get hospitalID from infrastructure
+		hospitalID = infrastructure.getHospitalID();
+		
+		// Create default patients
+		patientCreation = new PatientCreation(context, client);
+          
+		// Create doctors
+		doctorCreation = new DoctorCreation(client);
+		
+		// Create nurses
+		nurseCreation = new NurseCreation(client);
+			
 	}
-	/*
+
 	@Override
-	public boolean planEncounter(ResourceReferenceDt patientReference, String diagnosisICD,
-			ResourceReferenceDt stationReference) {
-		
-		Encounter plannedEncounter = new Encounter();
-		plannedEncounter.setSubject(patientReference);
-		
-		
-		MyCondition indication = new MyCondition(client, client., diagnosisICD, diagnosisText)
-		plannedEncounter.setIndication(theValue)
-		return false;
-	}
-	*/
+	public AdmissionContainer planAdmission(PatientCreationParameters patientParameters, 
+								 AdmissionParameters admissionParameters) 
+	{		
+		// TODO: Ensure that the following is done:
+		// Create new Admission Container:
+		// Create patient if not existing yet
+		// Create condition 
+		// Create visit with status 'planned'
 	
+		MyEntering entering = new MyEntering(client, context, patientParameters, admissionParameters, hospitalID, patientCreation ); 
+		AdmissionContainer admission = entering.getAdmission();
+			
+		return admission;
+	}
 	
 	@Override
 	public Organization getBirthStation() {
-		// TODO Auto-generated method stub
-		return null;
+		return infrastructure.getBirthStation(); 
 	}
 
 	@Override
-	public Organization getIMC() {
-		// TODO Auto-generated method stub
-		return null;
+	public Organization getIMC() {		
+		return infrastructure.getIMC(); 
 	}
 
+	
+	// TODO: SOMETHING
 	@Override
-	public AdmissionContainer admitPatient(PatientCreationParameters patient,
-			AdmissionParameters parameters) {
-	    
-	    return new MyEntering(client, context, patient, parameters).getAdmission();
+	public AdmissionContainer admitPatient(AdmissionContainer admission,
+							PatientCreationParameters patient,
+							AdmissionParameters parameters,
+							boolean planned) 
+	{    
+		// TODO: This must be used to expand the existing admission container
+		// TODO: Allow system to do both planning and admission at once for scenario birth
+		
+		/*
+		AdmissionContainer admission = new MyEntering(client, context, patient, parameters, hospitalID).getAdmission(); 
+	    		
+		if(planned)
+		{
+			admission.visit.setStatus(EncounterStateEnum.PLANNED);
+			// TODO Update server
+		}
+		
+		// Send ID to patientCreation for later deletion
+		patientCreation.addPatientToList(admission.patient.getId());
+		
+		*/
+		return admission;
 	}
 
 	@Override
 	public List<Practitioner> getNurses() {
-		// TODO Auto-generated method stub
-		return null;
+		return nurseCreation.getAllNurses();		
 	}
 
 	@Override
-	public List<Patient> getPatientList() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Patient> getPatientList() {		
+		return patientCreation.getAllPatients();
 	}
 
 	@Override
 	public boolean dischargePatient(AdmissionContainer admission) {
 		
 		admission.visit.setStatus(EncounterStateEnum.FINISHED);
+		admission.adm.setStatus(EncounterStateEnum.FINISHED);
+		
+		// TODO Ensure that server is updated
 		
 		Encounter dischargeEncounter = new Encounter();
 		
 		executePatientTransfer(admission, null, dischargeEncounter, admission.hospitalization, true);
 		
+		// TODO Fix return value
 		return true;
 	}
 
@@ -97,7 +134,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		
 		MyPatient.updatePatient(client, patient);
 		
-		return false;
+		// TODO Fix return value		
+		return true;
 	}
 
 	/**
@@ -121,9 +159,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		transferContainer.targetOrganizationReference = targetOrganizationReference;
 		transferContainer.duration = duration;
 		transferContainer.diagnosisICD = diagnosisICD;
-		transferContainer.diagnosisDescription = diagnosisDescription;
-		
-		
+		transferContainer.diagnosisDescription = diagnosisDescription;		
 		
 		// Create new duration
 		DurationDt encounterDuration = new DurationDt();
@@ -141,19 +177,15 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		beginningEncounter.setStatus(EncounterStateEnum.IN_PROGRESS);
 		beginningEncounter.setClassElement(runningEncounter.getClassElement());
 		beginningEncounter.setLength(encounterDuration);
-//				beginningEncounter.setReason() <-------- TODO INSERT Snomed CT value here.
+
 		beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(transferContainer.diagnosisICD));
+		
 		//TODO: add narrative (diagnosisDescription) to encouter reason	
-				
-				
+						
 		return executePatientTransfer(admission, transferContainer, beginningEncounter, beginningHospitalization,
 				false);
 	}
 
-	
-	
-	
-	
 	
 	private boolean executePatientTransfer(AdmissionContainer admission, 
 			TransferContainer transferContainer,
@@ -161,7 +193,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 			Hospitalization beginningHospitalization,
 			boolean discharge)
 	{
-		
+		admission.adm.setStatus(EncounterStateEnum.FINISHED);
 		
 		beginningEncounter.setSubject(admission.visit.getSubject());
 		ResourceReferenceDt visitReference = new ResourceReferenceDt(admission.visit);
@@ -169,7 +201,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		
 		if(discharge)
 		{
-			admission.visit.setStatus(EncounterStateEnum.FINISHED);
+			//admission.visit.setStatus(EncounterStateEnum.FINISHED); //already done in discharge
 			
 			beginningHospitalization.setDischargeDisposition(new CodeableConceptDt("http://hl7.org/fhir/discharge-disposition", "home"));
 		} else
@@ -177,29 +209,31 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 			beginningHospitalization.setDestination(transferContainer.targetOrganizationReference);
 		}
 		
+		// TODO Update encounters on server 
+		
 		beginningEncounter.setHospitalization(beginningHospitalization);
 		infrastructure.uploadEncounter(client, beginningEncounter);
 		admission.adm = beginningEncounter;
 	
-		
-		return false;
+		// TODO fix return value
+		return true;
 	}
 	
-	@Override
-	public List<Encounter> getAllPatientEncounters(Patient patient) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-
-
 	@Override
 	public void clearEntries() {
-		// TODO Auto-generated method stub
+				
+		// TODO: Remove encounters etc
 		
+		// Remove nurses
+        nurseCreation.removeAllNurses();
+        
+        // Remove doctors
+        doctorCreation.removeAllDoctors();
+        
+		// Remove default patients
+		patientCreation.removeAllPatients();
+				
+		// Remove default infrastructure
+        infrastructure.wipeInfrastructure(client);        
 	}
-
-
-
-
 }

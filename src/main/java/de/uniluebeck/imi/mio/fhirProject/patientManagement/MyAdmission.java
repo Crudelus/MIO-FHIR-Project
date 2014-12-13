@@ -71,18 +71,14 @@ public class MyAdmission {
 	admission.addIdentifier("http://kh-hh.de/mio/encounters","Adm-"+(int)(Math.random()*1000));
 	admission.setStatus(EncounterStateEnum.FINISHED);
 	admission.setClassElement(admClass);
-//	giveAdmClass(admClass);
 	admission.setSubject(new ResourceReferenceDt(patient.getId()));
 	admission.addParticipant().setIndividual(new ResourceReferenceDt(docId));	
 	admission.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));
 	admission.setIndication(new ResourceReferenceDt(indicationID));
         hosp.addAccomodation().setBed(new ResourceReferenceDt(station));
         hosp.setReAdmission(reAdmission); // accepts boolean and sets it true, if the patient was admitted one more time
-        admission.setHospitalization(hosp); 
-              
-        
-//      TODO: Would like to have a static ID for the hospital!!        
-//       admission.setServiceProvider(new ResourceReferenceDt(hospital));
+        admission.setHospitalization(hosp);       
+    admission.setServiceProvider(new ResourceReferenceDt(hospital));
 	
 	System.out.println("###### 5.2. Narrativer Text wird erstellt.");
 	setNarrative(patient);
@@ -137,11 +133,12 @@ public class MyAdmission {
      * @param indication
      * @param docId
      */
+    /*
     public MyAdmission(IGenericClient client, 
-		IdDt patId, 
-		EncounterClassEnum admClass, 
+			IdDt patId, 
+			EncounterClassEnum admClass, 
     		IdDt indicationID,
-		IdDt docId,
+    		IdDt docId,
     		IdDt station,
     		IdDt hospital,
     		boolean reAdmission) {
@@ -219,7 +216,7 @@ public class MyAdmission {
         
 	System.out.println("###### Encounter erfolgreich erstellt.");
     }
-    
+    */
     
     
     

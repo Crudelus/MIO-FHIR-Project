@@ -41,18 +41,7 @@ public class MyCondition {
 		indication.setCategory(new CodeableConceptDt("http://hl7.org/fhir/condition-category", "diagnosis"));
 		indication.setEncounter(new ResourceReferenceDt(encounterId));
 
-	        MethodOutcome outcome = client
-	                .create()
-	                .resource(indication)
-	                .prettyPrint()
-	                .encodedJson()
-	                .execute();
-	        IdDt id = outcome.getId();
-	        // use for nonversioned id:
-	        String elementSpecificId = id.getBaseUrl();
-	        String idPart = id.getIdPart();
-	        IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-	        indication.setId(idNonVersioned);
+        indication.setId(uploadCondition(client, indication));
 	    }
 	    
 	    
@@ -136,19 +125,7 @@ public class MyCondition {
 		+"/n Behandelnder Arzt: "+" ("+docId+")");
         
 	System.out.println("###### 4.1. Aufnahmediagnose auf den Server geladen...");
-        MethodOutcome outcome = client
-                .create()
-                .resource(indication)
-                .prettyPrint()
-                .encodedJson()
-                .execute();
-        IdDt id = outcome.getId();
-	System.out.println("###### Aufnahmediagnose-ID: "+id);
-        // use for nonversioned id:
-        String elementSpecificId = id.getBaseUrl();
-        String idPart = id.getIdPart();
-        IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-        indication.setId(idNonVersioned);
+        indication.setId(uploadCondition(client, indication));
         
 	System.out.println("###### Aufnahmediagnose erfolgreich erstellt.");
     }
@@ -159,6 +136,30 @@ public class MyCondition {
      */
     public Condition getCondObj(){
 	return indication;
+    }
+    
+    public static IdDt uploadCondition(IGenericClient client,Condition condition){
+        MethodOutcome outcome = client
+                .create()
+                .resource(condition)
+                .prettyPrint()
+                .encodedJson()
+                .execute();
+        IdDt id = outcome.getId();
+        
+        // use for nonversioned id:
+        String elementSpecificId = id.getBaseUrl();
+        String idPart = id.getIdPart();
+        return new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart); 
+    }
+    
+    public static boolean updateCondition(IGenericClient client,Condition condition){
+    	client  .update()
+                .resource(condition)
+                .execute();
+    	
+    	// TODO fix return type
+    	return true;
     }
     
 }

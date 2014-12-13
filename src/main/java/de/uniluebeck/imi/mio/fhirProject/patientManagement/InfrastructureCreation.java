@@ -8,22 +8,15 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
-import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.resource.Encounter.Hospitalization;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
 
 
@@ -31,6 +24,13 @@ public class InfrastructureCreation {
 	
 	private FhirContext context;
 	private IGenericClient client;
+	
+	private IdentifierDt hospitalIdentifier;
+	private IdDt hospitalID;
+	
+	private IdDt imcID;	// TODO set
+	private IdDt birthStationID;// TODO set
+	
 	
 	public InfrastructureCreation(FhirContext inContext, IGenericClient inClient)
 	{
@@ -43,13 +43,30 @@ public class InfrastructureCreation {
 		}catch(IOException e){
 			
 			e.printStackTrace();
-			System.out.println("Error during infrastructure creation!");
-			
+			System.out.println("Error during infrastructure creation!");			
 		}
 		
 	}
 
+	public IdentifierDt getHospitalIdentifier()
+	{
+		return hospitalIdentifier;
+	}
 	
+	public IdDt getHospitalID()
+	{
+		return hospitalID;
+	}
+	
+	public Organization getBirthStation()
+	{
+		return client.read(Organization.class, birthStationID);
+	}
+	
+	public Organization getIMC()
+	{
+		return client.read(Organization.class, imcID);		
+	}
 	
 	/**
 	 * This method creates all necessary infrastructure-resources
@@ -61,15 +78,17 @@ public class InfrastructureCreation {
 	 */
 	public void createInfrastructure(FhirContext ctx, IGenericClient client) throws IOException
 	{
-		Organization hospital = new Organization();
-		
-		
+		Organization hospital = new Organization();		
 		
 		/*
 		 * Create MIO hospital
 		 */
-		hospital.addIdentifier().setSystem("http://www.kh-hh.de/mio/organizations").setValue("MIO");
+		
+		hospitalIdentifier = new IdentifierDt("http://www.kh-hh.de/mio/organizations","MIO");
+		
+		hospital.addIdentifier().setSystem(hospitalIdentifier.getSystem()).setValue(hospitalIdentifier.getValue());
 		hospital.setName("MIO Krankenhaus Hamburg");
+		
 		
 		ResourceReferenceDt hospitalResource = new ResourceReferenceDt();
 		hospitalResource.setResource(hospital);
@@ -100,12 +119,12 @@ public class InfrastructureCreation {
 		receptionRoomLocation.setId(uploadLocation(client, receptionRoomLocation));
 				
 		createLocation(hospitalLocation, client, hospitalAddress, hospital, receptionRoomLocation);
+				
 		
-		hospital.setId(uploadOrganization(client, hospital));
-		
-		
-		
-		
+		//hospital.setId(uploadOrganization(client, hospital));
+		hospitalID = uploadOrganization(client, hospital);
+		hospital.setId(hospitalID);
+				
 		
 		/*
 		 *  Create birth station (BS)

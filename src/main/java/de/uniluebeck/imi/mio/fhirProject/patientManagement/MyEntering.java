@@ -1,13 +1,20 @@
 package patientManagement;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Encounter.Hospitalization;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
@@ -49,9 +56,15 @@ public class MyEntering {
 //	    		IdDt docId,
 //	    		String docName) {
     
-  public MyEntering(IGenericClient client,FhirContext ctx,
-			PatientCreationParameters patParams,
-	    		AdmissionParameters admParams) {
+    
+    
+    
+  public MyEntering(IGenericClient client,
+	  				FhirContext ctx,
+					PatientCreationParameters patParams,
+					AdmissionParameters admParams, 
+					IdDt hospitalID,
+					PatientCreation patientCreation) {
 	
       
 	System.out.println("###### 3. Die Aufnahme wird generiert...\n");
@@ -62,53 +75,88 @@ public class MyEntering {
 		.where(Patient.GIVEN.matches().value(patParams.firstName))
 		.and(Patient.FAMILY.matches().value(patParams.lastName))
 		.execute();
-	if(results.isEmpty()){
-	    System.out.println("###### 3.2. Nein. Ein neuer Patient wird angelegt...");
-	    boolean reAdmission = false;
-//	    MyPatient patient = new MyPatient(name, gender, birthDate, address, maritalStatus);
-	    MyPatient patient = new MyPatient(patParams);
-	    patient.setCareProvider(new ResourceReferenceDt());
-	    patient.setManagingOrganization(new ResourceReferenceDt());
 		
-	    Patient p = patient.getPatientObj(); 
-	    IdDt patId = MyPatient.createPatient(client, p); //has to be uploaded first to get the Id for Encounter etc.
-	    MyPatient.updatePatient(client, p);
-	    
+	Patient patient = new Patient();
+	
+	// Ensure that patient already exists or gets created
+	if(results.isEmpty()){
+	
+		System.out.println("###### 3.2. Nein. Ein neuer Patient wird angelegt...");
 
-//	    printPat(ctx,p);
-//	    Condition indication = new MyCondition(client, p, docID, docName, diagnosisICD, diagnosisText).getCondObj();
-	    Condition indication = new MyCondition(client, p, admParams.doctorID, admParams.diagnosisICD, admParams.diagnosisDescription).getCondObj();
-	    MyAdmission adm = new MyAdmission(client, p, admParams.admissionClass, indication.getId(),admParams.doctorID,admParams.station,admParams.hospital, reAdmission);
-	    indication.setEncounter(new ResourceReferenceDt(adm.getAdmObj().getId()));
+	    MyPatient myPatient = new MyPatient(patParams);	    
 	    
-	    // filling container class
-	    admission.adm = adm.getAdmObj();
-	    admission.visit = adm.getVisitObj();
-	    admission.patient = p;
-	    admission.hospitalization = adm.getHospitalization();
-	    admission.condition = indication;
+	    patient = myPatient.getPatientObj(); 
+	    IdDt patId = MyPatient.createPatient(client, patient);
+	    MyPatient.updatePatient(client, patient);		    
 	}
-	else{
-	    System.out.println("###### 3.2. Ja. Die Patienten-ID wird abgerufen...");
-	    boolean reAdmission = true;
+	else
+	{
 	    IdDt patId = results.getEntries().get(0).getId();
-	    Patient readmissionedPatient = getPatientFromID(client, patId);
-	    System.out.println("PatID: "+patId);
+		patient = client.read(Patient.class, patId);
+	}	
+	
+	// CREATE INDICATION
+	Condition condition = new MyCondition(client, patient, admParams.doctorID, admParams.diagnosisICD, admParams.diagnosisDescription).getCondObj();
+	   	
+	// CREATE VISIT ENCOUNTER	
+	Date date = java.util.Calendar.getInstance().getTime();
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    String dateString = dateFormatter.format(date);
+	    
+	Encounter visit = new Encounter();
+	// big encounter to record the whole visit of the patient
+	visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000));
+	visit.setStatus(EncounterStateEnum.PLANNED);
+	visit.setClassElement(admParams.admissionClass);
+	visit.setSubject(new ResourceReferenceDt(patient.getId()));
+	visit.addParticipant().setIndividual(new ResourceReferenceDt(admParams.doctorID));	
+	visit.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));
+	visit.setIndication(new ResourceReferenceDt(condition.getId()));
+	
+	// CREATE HOSPITALIZATION
+	Hospitalization hosp = new Hospitalization();
+	  
+	hosp.addAccomodation().setBed(new ResourceReferenceDt(admParams.station));
+	hosp.setReAdmission(false); // accepts boolean and sets it true, if the patient was admitted one more time
+    
+	// TODO Upload hospitalization 
+	
+    // TODO Upload visit    
+		  
+    condition.setEncounter(new ResourceReferenceDt(visit.getId()));
 
-	    Condition indication = new MyCondition(client, readmissionedPatient, admParams.doctorID, admParams.diagnosisICD, admParams.diagnosisDescription).getCondObj();
-	    System.out.println("###### admission loaded");
-	    MyAdmission adm = new MyAdmission(client, readmissionedPatient, admParams.admissionClass, indication.getId(),admParams.doctorID, admParams.station,admParams.hospital, reAdmission);
-	    indication.setEncounter(new ResourceReferenceDt(adm.getAdmObj().getId()));
-	    
-	    // filling container class
-	    admission.adm = adm.getAdmObj();
-	    admission.visit = adm.getVisitObj();
-	    admission.patient = readmissionedPatient;
-//	    admission.patientID = patId;
-	    admission.hospitalization = adm.getHospitalization();
-	    admission.condition = indication;
-	    
-	}
+    // TODO Upload Condition   
+    MyCondition.updateCondition(client, condition);
+    
+    // filling container class
+    //admission.adm = adm.getAdmObj();
+    admission.visit = visit;
+    admission.patient = patient;
+    admission.hospitalization = visit.getHospitalization();
+    admission.condition = condition;
+	
+    /* Formerly for already existing patients
+    System.out.println("###### 3.2. Ja. Die Patienten-ID wird abgerufen...");
+    boolean reAdmission = true;
+    IdDt patId = results.getEntries().get(0).getId();
+    Patient readmissionedPatient = getPatientFromID(client, patId);
+    System.out.println("PatID: "+patId);
+
+    Condition indication = new MyCondition(client, readmissionedPatient, admParams.doctorID, admParams.diagnosisICD, admParams.diagnosisDescription).getCondObj();
+    System.out.println("###### admission loaded");
+    MyAdmission adm = new MyAdmission(client, readmissionedPatient, admParams.admissionClass, indication.getId(),admParams.doctorID, admParams.station, hospitalID, reAdmission);
+    indication.setEncounter(new ResourceReferenceDt(adm.getAdmObj().getId()));
+    MyCondition.updateCondition(client, indication);
+    
+    // filling container class
+    admission.adm = adm.getAdmObj();
+    admission.visit = adm.getVisitObj();
+    admission.patient = readmissionedPatient;
+//	admission.patientID = patId;
+    admission.hospitalization = adm.getHospitalization();
+    admission.condition = indication;
+    */
+	
 
     }
     

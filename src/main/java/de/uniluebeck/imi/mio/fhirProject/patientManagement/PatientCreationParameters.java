@@ -19,6 +19,21 @@ public class PatientCreationParameters
 	public String zip;
 	public String city;
 	
-
+	public PatientCreationParameters(){}
 	
+	// Construct a new set of parameters by using a copy constructor
+	PatientCreationParameters(PatientCreationParameters other) 
+	{
+		this.firstName = other.firstName;
+		this.lastName = other.lastName;
+		this.maidenName = other.maidenName;
+		this.birthDate = other.birthDate;
+		this.gender = other.gender;
+		this.maritalStatus = other.maritalStatus;
+
+		// address:
+		this.line = other.line;
+		this.zip = other.zip;
+		this.city = other.city;		
+	}
 }

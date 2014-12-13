@@ -1,6 +1,7 @@
 package patientManagement;
 
 
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -41,8 +42,9 @@ public class MyPatient {
     // can only be set without constructor
 //    private boolean deceased;
 //    private boolean multipleBirth;
+
     private ResourceReferenceDt managingOrganization;
-    private ResourceReferenceDt careProvider;
+    //private ResourceReferenceDt careProvider;
     
     // new Patient
     private Patient patient = new Patient();
@@ -80,7 +82,7 @@ public class MyPatient {
 	patient.setGender(gender);
 //	givePatGender(gender);
 	patient.setBirthDate(birthDate);
-	
+
 	
 	patient.addAddress().addLine(line).setZip(zip).setCity(city).setUse(AddressUseEnum.HOME);
 //	for (MyAddress addSingle:address){
@@ -356,9 +358,11 @@ public class MyPatient {
 //	this.maritalStatus = maritalStatus;
 //    }
    
+    /*    
     public void setCareProvider(ResourceReferenceDt careProvider) {
 	this.careProvider = careProvider;
     }
+    */
     
 //    public void setDeceased(boolean deceased) {
 //	this.deceased = deceased;

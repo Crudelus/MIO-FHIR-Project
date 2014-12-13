@@ -12,8 +12,4 @@ public class AdmissionParameters {
     public String diagnosisDescription; // "Entbindung-Spontangeburt"
     public IdDt doctorID;
     public IdDt station;
-    public IdDt hospital;
-
-    
-    
 }
