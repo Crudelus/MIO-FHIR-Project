@@ -22,10 +22,10 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 public class ServerCommunication {
 	private IGenericClient client;
 	private ArrayList<IdDt> generatedObjects = new ArrayList<IdDt>();
-	ResourceReferenceDt hospitalId;
+	IdDt hospitalId;
 
 	public ServerCommunication(FhirContext ctx, String serverBase,
-			ResourceReferenceDt hospital) {
+			IdDt hospital) {
 		this.client = ctx.newRestfulGenericClient(serverBase);
 		this.hospitalId = hospital;
 	}
@@ -109,25 +109,13 @@ public class ServerCommunication {
 		return obsForPat;
 	}
 
-	public void wennDasFunzt() {
-		Organization hospital = client.read(Organization.class,
-				hospitalId.getReference());
-		Bundle bundle = client
-				.search()
-				.forResource(Device.class)
-				.where(Device.ORGANIZATION
-						.hasChainedProperty(Organization.PARTOF
-								.hasId(hospitalId.getElementSpecificId())))
-				.execute();
-		System.out.println(bundle.size());
-	}
-
+	
 	/**
 	 * @return
 	 */
 	public List<Device> getAllDevices() {
 		Organization org = client.read(Organization.class,
-				hospitalId.getReference());
+				hospitalId);
 
 		System.out.println(org.getId());
 
@@ -174,6 +162,12 @@ public class ServerCommunication {
 		}
 		return deviceInHospital;
 
+	}
+
+	public Organization getStation(String string) {
+		Bundle bundle = client.search().forResource(Organization.class).where(Organization.NAME.matchesExactly().value(string)).and(Organization.PARTOF.hasId(hospitalId)).execute();
+		System.out.println(bundle.size());
+		return bundle.getResources(Organization.class).get(0);
 	}
 
 }

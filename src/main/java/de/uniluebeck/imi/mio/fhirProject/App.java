@@ -1,9 +1,9 @@
 package de.uniluebeck.imi.mio.fhirProject;
 
-import java.util.Scanner;
+
+import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -20,16 +20,16 @@ public class App
     {
 	FhirContext ctx = new FhirContext(); // TODO should be the same in every
 	
-	MIODeviceSystem mioDev=new MIODeviceSystem("http://fhirtest.uhn.ca/base",ctx,new ResourceReferenceDt(new IdDt("Organization", "6009")));
-	mioDev.createBasicInfrastructure();
 	
-	Scanner scan = new Scanner(System.in);
-//	mioDev.getHospitalDevices();
-
+	MIODeviceSystem mioDev=new MIODeviceSystem("http://fhirtest.uhn.ca/base",ctx,new IdDt("Organization", "6009"));
+//	mioDev.createBasicInfrastructure();
 	
-	ServerCommunication serv= new ServerCommunication(ctx, "http://fhirtest.uhn.ca/base", new ResourceReferenceDt(new IdDt("Organization", "6009")));
+//	Scanner scan = new Scanner(System.in);
 	
-	serv.getAllDevices();
+	
+//	ServerCommunication serv= new ServerCommunication(ctx, "http://fhirtest.uhn.ca/base", new ResourceReferenceDt(new IdDt("Organization", "6009")));
+	
+//	serv.getAllDevices();
 	
 	
 	
