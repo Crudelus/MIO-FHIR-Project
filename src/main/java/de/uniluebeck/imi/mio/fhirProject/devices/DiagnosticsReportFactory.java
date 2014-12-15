@@ -1,10 +1,15 @@
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport.VirtualDeviceChannelMetric;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -72,11 +77,11 @@ public class DiagnosticsReportFactory {
 		return outLab.getId();
 	}
 
-	public IdDt newVitalParameterReport(IdDt diagOrderId, IdDt patId) {
+	public IdDt newDeviceObservationReport(IdDt deviceId, IdDt diagOrderId, IdDt patId) {
 
-		DiagnosticReport lab = new DiagnosticReport();
-		lab.addRequestDetail().setReference(diagOrderId);
-		lab.setSubject(new ResourceReferenceDt(patId));
+		DeviceObservationReport vitPar = new DeviceObservationReport();
+		vitPar.setSubject(new ResourceReferenceDt(patId));
+		vitPar.setSource(new ResourceReferenceDt(deviceId));
 
 		// temperature
 		QuantityDt temp = new QuantityDt();
@@ -110,10 +115,21 @@ public class DiagnosticsReportFactory {
 
 		MethodOutcome outPres = communicator.createRessourceOnServer(obvPres);
 		MethodOutcome outTemp = communicator.createRessourceOnServer(obvTemp);
-		lab.addResult().setReference(outPres.getId());
-		lab.addResult().setReference(outTemp.getId());
-		MethodOutcome outLab = communicator.createRessourceOnServer(lab);
+		
+		VirtualDeviceChannelMetric pressure = new VirtualDeviceChannelMetric();
+		VirtualDeviceChannelMetric temperature = new VirtualDeviceChannelMetric();
+		
+		pressure.setObservation(new ResourceReferenceDt(outPres.getId()));
+		temperature.setObservation(new ResourceReferenceDt(outTemp.getId()));
+		
+		ArrayList<VirtualDeviceChannelMetric> metric = new ArrayList<VirtualDeviceChannelMetric>();
+		metric.add(temperature);
+		metric.add(pressure);
+		
+		vitPar.addVirtualDevice().addChannel().setMetric(metric);
 
-		return outLab.getId();
+		MethodOutcome outDev = communicator.createRessourceOnServer(vitPar);
+
+		return outDev.getId();
 	}
 }

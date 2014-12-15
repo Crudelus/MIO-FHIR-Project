@@ -22,7 +22,7 @@ public class App {
 		DiagnosticsReportFactory drf = new DiagnosticsReportFactory(ctx,
 				"http://fhirtest.uhn.ca/base", new IdDt("Organization",
 						"4237"));
-		drf.newLaboratoryReport();
+		//drf.newLaboratoryReport();
 		// mioDev.createBasicInfrastructure();
 
 		// Scanner scan = new Scanner(System.in);
