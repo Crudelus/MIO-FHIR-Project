@@ -70,12 +70,12 @@ public class ServerCommunication {
 	}
 
 	/**
-	 * @param deviceID
+	 * @param resourceID
 	 * @return true if deleted false if error
 	 */
-	public boolean deleteDevice(IdDt deviceID) {
+	public boolean deleteResourceOnServer(IdDt resourceID) {
 		try {
-			OperationOutcome outcome = client.delete().resourceById(deviceID)
+			OperationOutcome outcome = client.delete().resourceById(resourceID)
 					.execute();
 			return true;
 		} catch (Exception e) {
@@ -87,8 +87,7 @@ public class ServerCommunication {
 
 	public void deleteAll() {
 		for (IdDt id : generatedObjects) {
-
-			deleteDevice(id);
+			deleteResourceOnServer(id);
 		}
 	}
 

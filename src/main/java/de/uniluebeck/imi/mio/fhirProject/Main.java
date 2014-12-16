@@ -1,4 +1,4 @@
-package de.uniluebeck.imi.mio.fhirProject.patientManagement;
+package de.uniluebeck.imi.mio.fhirProject;
 
 import java.util.List;
 
@@ -11,6 +11,12 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import de.uniluebeck.imi.mio.fhirProject.devices.MIODeviceSystem;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionContainer;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionParameters;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.IPatientManagementSystem;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientCreationParameters;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientManagementSystem;
 
 public class Main
 {
@@ -22,8 +28,13 @@ public class Main
 	    FhirContext context = new FhirContext();
 	    IGenericClient client = context.newRestfulGenericClient(serverBase);
 
+	    
 	    // Create and initialize 
 	    IPatientManagementSystem patientManagement = new PatientManagementSystem(context, client);
+	    
+
+	    //MIODeviceSystem initialize
+	    MIODeviceSystem deviceManager = new MIODeviceSystem(serverBase, context, null); //TODO: wir brauchen die ID für MIO krankenhaus
 	    
 	    // Scenario:   
 	    // Get parameters for patient admission
@@ -82,6 +93,7 @@ public class Main
 	    // At end of scenario:
 	    // Clean infrastructure from server
 	    patientManagement.clearEntries();
+	    deviceManager.delAll();
 	  
 	}
     

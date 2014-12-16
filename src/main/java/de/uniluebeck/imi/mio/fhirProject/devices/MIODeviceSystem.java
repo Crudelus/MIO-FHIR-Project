@@ -126,7 +126,7 @@ public class MIODeviceSystem implements IDevice {
 
     public boolean delDev(String id) {
 	IdDt deviceId = new IdDt("Device", id);
-	communicator.deleteDevice(deviceId);
+	communicator.deleteResourceOnServer(deviceId);
 	return true;
     }
 
