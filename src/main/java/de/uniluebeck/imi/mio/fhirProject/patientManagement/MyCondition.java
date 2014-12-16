@@ -1,4 +1,4 @@
-package patientManagement;
+package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;

@@ -1,4 +1,4 @@
-package patientManagement;
+package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
 /**
  *  Class for Addresses

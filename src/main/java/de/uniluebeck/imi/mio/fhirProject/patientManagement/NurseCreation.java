@@ -1,4 +1,4 @@
-package patientManagement;
+package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
 import java.util.ArrayList;
 import java.util.List;

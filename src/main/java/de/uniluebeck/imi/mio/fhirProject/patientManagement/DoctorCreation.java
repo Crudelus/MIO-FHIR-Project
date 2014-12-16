@@ -1,4 +1,4 @@
-package patientManagement;
+package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
