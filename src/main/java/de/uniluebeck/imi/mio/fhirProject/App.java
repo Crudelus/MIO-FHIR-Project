@@ -16,13 +16,10 @@ public class App
 	public static final FhirContext ctx = new FhirContext();
 	public static final CReportManagmentSystem rms = new CReportManagmentSystem();
 	public static final DeviceCommunicationSystem dcs = new DeviceCommunicationSystem();
+	
     public static void main( String[] args )
     {
-    	
-    	
-    	
-    	
-    	
+    		
       
     }
     

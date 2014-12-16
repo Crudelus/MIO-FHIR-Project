@@ -10,7 +10,7 @@ public class DeviceCommunicationSystem
 	 * 
 	 */
 	
-	public void getMedicalThings(IdDt diagnosticOrder, IdDt patient)
+	public void createMedicalOrder(IdDt diagnosticOrder, IdDt patient)
 	{
 		/*
 		 * Idee des Vorgehens:
@@ -19,4 +19,7 @@ public class DeviceCommunicationSystem
 		 */
 		
 	}
+	
+	
+	
 }
