@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -449,6 +450,29 @@ public class InfrastructureCreation {
 	
 	
 	/**
+	 * This method creates a composition on the server using the specified IGenericClient and 
+	 * retrieves the technical ID. The ID is then shortened and stripped off the appended version
+	 * 
+	 * @param client
+	 * @param location
+	 * @return The non-versioned technical ID of the location
+	 */
+	public IdDt uploadComposition(IGenericClient client, Composition compositon)
+	{
+		
+		MethodOutcome  outcome = client.create().resource(compositon).prettyPrint().encodedXml().execute();
+		IdDt id = outcome.getId();
+		String idPart = id.getIdPart();
+		String elementSpecificId = id.getBaseUrl();
+		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
+
+		
+		return idNonVersioned;
+		
+	}
+	
+	
+	/**
 	 * This method creates an encounter on the server using the specified IGenericClient and 
 	 * retrieves the technical ID. The ID is then shortened and stripped off the appended version
 	 * 
@@ -569,48 +593,5 @@ public class InfrastructureCreation {
 		// Create a resource reference
 		organizationReference.setReference(organization.getId());
 		
-	}
-	
-
-	
-	/**
-	 * This method is used to transfer patients from one station to another. The running encounter-data is reused as much 
-	 * as possible and it's status is then set to "finished". A new encounter is created.
-	 * 
-	 * @param client
-	 * @param runningEncounter
-	 * @param targetOrganizationRefernce
-	 * @param duration
-	 */
-	/*
-	public void transferPatient(IGenericClient client, 
-			Encounter runningEncounter, 
-			ResourceReferenceDt targetOrganizationReference, 
-			long duration)
-	{
-		// Create new duration
-		DurationDt encounterDuration = new DurationDt();
-		encounterDuration.setValue(duration);
-		
-		// Create new hospitalization
-		Hospitalization beginningHospitalization = new Hospitalization();
-		beginningHospitalization.setDestination(targetOrganizationReference);
-		beginningHospitalization.setOrigin(runningEncounter.getHospitalization().getOrigin());
-		
-		// Fill new encounter with values of the ending encounter that are still valid
-		Encounter beginningEncounter = new Encounter();
-		uploadEncounter(client, beginningEncounter);
-		beginningEncounter.setStatus(EncounterStateEnum.IN_PROGRESS);
-		beginningEncounter.setClassElement(runningEncounter.getClassElement());
-		beginningEncounter.setType(runningEncounter.getType());
-		beginningEncounter.setSubject(runningEncounter.getSubject());
-		beginningEncounter.setLength(encounterDuration);
-		beginningEncounter.setHospitalization(beginningHospitalization);
-//		beginningEncounter.setReason() <-------- TODO INSERT Snomed CT value here.
-		beginningEncounter.setPartOf(runningEncounter.getPartOf());
-		
-		// Change status of old encounter to finished, since the new encounter has started
-		runningEncounter.setStatus(EncounterStateEnum.FINISHED);
-	}
-	*/
+	}	
 }

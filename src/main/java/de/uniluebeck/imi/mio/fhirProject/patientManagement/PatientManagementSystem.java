@@ -4,6 +4,7 @@ import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.DurationDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
@@ -11,10 +12,13 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu.resource.Encounter.Hospitalization;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.CompositionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.model.dstu.resource.Composition;
 
 public class PatientManagementSystem implements IPatientManagementSystem{
 
@@ -27,6 +31,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	private NurseCreation nurseCreation;
 	
 	private IdDt hospitalID;
+	
+	private List<IdDt> compositionList;
 	
 	public PatientManagementSystem(FhirContext inContext, IGenericClient inClient)
 	{
@@ -50,6 +56,12 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 			
 	}
 
+    @Override
+    public IdDt getHospitalID()
+    {
+        return infrastructure.getHospitalID(); 
+    }
+    
 	@Override
 	public AdmissionContainer planAdmission(PatientCreationParameters patientParameters, 
 								 AdmissionParameters admissionParameters) 
@@ -75,6 +87,46 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	public Organization getIMC() {		
 		return infrastructure.getIMC(); 
 	}
+	
+	
+	// TODO: Create external practitioner
+	public List<IdDt> createComposition(AdmissionContainer admissionContainer)
+	{
+		Composition composition = new Composition();
+		
+		IdDt externalDoctorId = new IdDt();
+		externalDoctorId = doctorCreation.createDoctor("http://www.kh-hh.de/mio/practitioner", 
+							"123456", "Schroeder", "Gerhard", "Musterstrasse 2", "22113", 
+							"Hamburg", AdministrativeGenderCodesEnum.M);
+		
+		
+		composition.setTitle("Arztbrief");
+
+		// TODO: Unsure whether these are the correct codes!
+		composition.setClassElement(new CodeableConceptDt("http://loinc.org", "11495-9"))
+					.setTitle("Physical Therapy Initial Assessment Note At First Encounter");
+		composition.setType(new CodeableConceptDt("http://loinc.org", "34763-3"));
+		
+		
+		composition.setStatus(CompositionStatusEnum.FINAL);
+		composition.setConfidentiality(new CodingDt("http://hl7.org/fhir/v3/Confidentiality", "R"));
+		
+		composition.addAuthor().setReference(externalDoctorId);
+		composition.setSubject(new ResourceReferenceDt(admissionContainer.patient.getId()));
+		composition.setEncounter(new ResourceReferenceDt(admissionContainer.visit.getId()));
+		composition.setCustodian(new ResourceReferenceDt(hospitalID));
+
+		IdDt compositionId = infrastructure.uploadComposition(client, composition);
+		
+		admissionContainer.composition = composition;
+		
+		compositionList.add(compositionId);
+		
+		//TODO write delete-function if necessary
+		
+		return compositionList;
+
+	}
 
 	
 	// TODO: SOMETHING
@@ -86,6 +138,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	{    
 		// TODO: This must be used to expand the existing admission container
 		// TODO: Allow system to do both planning and admission at once for scenario birth
+		// TODO: Note: Arztbrief is implemented (createComposition)
 		
 		/*
 		AdmissionContainer admission = new MyEntering(client, context, patient, parameters, hospitalID).getAdmission(); 

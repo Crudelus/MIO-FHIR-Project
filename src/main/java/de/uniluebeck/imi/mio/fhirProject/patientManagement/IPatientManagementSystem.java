@@ -10,13 +10,11 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 
 public interface IPatientManagementSystem {
 	
+    public IdDt getHospitalID();
+    
     // Plan encounters
 	public AdmissionContainer planAdmission(PatientCreationParameters patientParameters, 
-		 						AdmissionParameters admissionParameters);
-	
-	  // Get the two relevant stations [references?]
-    public Organization getBirthStation();
-    public Organization getIMC();
+		 						AdmissionParameters admissionParameters);	
 
 	// Admit a new patient:
     //  -Creates patient according to parameters if necessary
@@ -25,9 +23,14 @@ public interface IPatientManagementSystem {
 											PatientCreationParameters patient,
 											AdmissionParameters parameters,
 											boolean planned);	
-
-	
-	
+            
+	// Transfer a patient to a new station
+	public boolean transferPatient(AdmissionContainer admission, 
+			ResourceReferenceDt targetOrganizationReference,
+			long duration,
+			String diagnosisICD,
+			String diagnosisDescription);	
+            
     // Get all nurses [references?]
     public List<Practitioner> getNurses();
 	
@@ -38,15 +41,13 @@ public interface IPatientManagementSystem {
     public boolean dischargePatient(AdmissionContainer admission);
 	
 	// Update data of an existing patient
-	public boolean updatePatient(Patient patient);
-	
-	// Transfer a patient to a new station
-	public boolean transferPatient(AdmissionContainer admission, 
-			ResourceReferenceDt targetOrganizationReference,
-			long duration,
-			String diagnosisICD,
-			String diagnosisDescription);	
+	public boolean updatePatient(Patient patient);	
 
+    // Get the two relevant stations [references?]
+    public Organization getBirthStation();
+    public Organization getIMC();
+
+    
     // Remove all infrastructure and default entries
     public void clearEntries();	
 }
