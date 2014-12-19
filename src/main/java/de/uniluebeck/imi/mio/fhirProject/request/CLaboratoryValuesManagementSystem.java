@@ -23,7 +23,8 @@ public class CLaboratoryValuesManagementSystem {
 
 	private IGenericClient client;
 	
-	public DiagnosticOrder newOrder(FhirContext ctx, IdDt patient, IdDt orderer, NarrativeDt text, CodeableConceptDt code, CodeableConceptDt bodysite){
+	public DiagnosticOrder newOrder(FhirContext ctx, IdDt patient, IdDt orderer, NarrativeDt text, 
+			CodeableConceptDt code, CodeableConceptDt bodysite){
 		
 		this.client = ctx.newRestfulGenericClient(serverBase);
 
@@ -46,11 +47,11 @@ public class CLaboratoryValuesManagementSystem {
 		return order;
 	}
 	
-	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(DiagnosticOrder order){
-	
-		// get Order status information (maybe more information??)
+	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(FhirContext ctx, IdDt order){
+		this.client = ctx.newRestfulGenericClient(serverBase);
 				
-		return order.getStatus();
+		return null;
+		
 	}
 	
 	public DiagnosticReport getResult(FhirContext ctx, IdDt patient, DiagnosticOrder order){
@@ -63,12 +64,9 @@ public class CLaboratoryValuesManagementSystem {
 		if(response.size()!=1){
 			List<IResource> list=response.toListOfResources();
 			for(int i=0; i<list.size();i++){
-				// get each element and check????
-			
+				// get each element and check????	
 			}
 		}
-		
-		
 		// get the Report 
 		DiagnosticReport report = client.read(DiagnosticReport.class, patient);
 		
