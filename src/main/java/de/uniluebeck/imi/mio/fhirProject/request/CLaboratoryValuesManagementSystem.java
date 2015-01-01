@@ -41,36 +41,64 @@ public class CLaboratoryValuesManagementSystem {
 		//order.setItem(item);		//LOINC?
 		order.addItem().setCode(code);
 		order.addItem().setBodySite(bodysite);
-
+		
 		//create in server
 		client.create().resource(order).prettyPrint().encodedJson().execute();
 		return order;
 	}
 	
-	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(FhirContext ctx, IdDt order){
+	/*
+	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(FhirContext ctx, IdDt orderId){
 		this.client = ctx.newRestfulGenericClient(serverBase);
-				
-		return null;
+		BoundCodeDt<DiagnosticOrderStatusEnum> status;
+		Bundle response = client.search()
+			      .forResource(DiagnosticReport.class)
+			      .where(DiagnosticReport.IDENTIFIER.equals(orderId))
+			      .execute();
+		if(response.isEmpty()){
+			
+		}
+		
+		return status;
 		
 	}
+	*/
 	
-	public DiagnosticReport getResult(FhirContext ctx, IdDt patient, DiagnosticOrder order){
+	public DiagnosticOrder checkOrder(FhirContext ctx, IdDt orderId){
+		this.client = ctx.newRestfulGenericClient(serverBase);
+		DiagnosticOrder order;
+		Bundle response = client.search()
+				.forResource(DiagnosticOrder.class)
+				.where(DiagnosticOrder.IDENTIFIER.exactly().identifier(orderId.getValue()))
+				.execute();
+		if(!response.isEmpty()){
+			order = (DiagnosticOrder) response.getResourceById(orderId);
+			return order;
+		}
+		
+		return null;
+	}
+	
+	public DiagnosticReport getResult(FhirContext ctx, IdDt patient, IdDt orderId){
+		this.client = ctx.newRestfulGenericClient(serverBase);
+		DiagnosticReport report;
 		Bundle response = client.search()
 			      .forResource(DiagnosticReport.class)
 			      .where(DiagnosticReport.SUBJECT.hasId(patient))
-			      .and(DiagnosticReport.IDENTIFIER.exactly().identifier(order.CODE.getParamName()))
+			      .and(DiagnosticReport.REQUEST.hasId(orderId))
 			      .execute();
-		// should be only one DiagnosticReport....? 
-		if(response.size()!=1){
-			List<IResource> list=response.toListOfResources();
-			for(int i=0; i<list.size();i++){
-				// get each element and check????	
+		
+		// return the DiagnosticReport with reference DiagnositcOrder Id == orderId
+		if(!response.isEmpty()){
+			List<DiagnosticReport> reportList = response.getResources(DiagnosticReport.class);
+			for(int i=0;i<reportList.size();i++){
+				if(reportList.get(i).getRequestDetail() == orderId){
+					report = reportList.get(i);
+					return report;
+				}
 			}
 		}
-		// get the Report 
-		DiagnosticReport report = client.read(DiagnosticReport.class, patient);
-		
-		return report;
+		return null;
 	}
 	
 }
