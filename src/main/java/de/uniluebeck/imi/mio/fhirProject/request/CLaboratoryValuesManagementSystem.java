@@ -16,7 +16,6 @@ import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
-//import de.uniluebeck.imi.mio.fhirProject.devices.ServerCommunication;
 
 public class CLaboratoryValuesManagementSystem {
 	static String serverBase = "http://fhirtest.uhn.ca/base";
