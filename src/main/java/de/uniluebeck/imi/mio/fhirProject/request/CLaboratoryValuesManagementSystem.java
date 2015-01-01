@@ -90,7 +90,9 @@ public class CLaboratoryValuesManagementSystem {
 		
 		// return the DiagnosticReport with reference DiagnositcOrder Id == orderId
 		if(!response.isEmpty()){
+			
 			List<DiagnosticReport> reportList = response.getResources(DiagnosticReport.class);
+			
 			for(int i=0;i<reportList.size();i++){
 				if(reportList.get(i).getRequestDetail() == orderId){
 					report = reportList.get(i);
