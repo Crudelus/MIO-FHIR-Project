@@ -11,7 +11,7 @@ import de.uniluebeck.imi.mio.fhirProject.report.CReportManagmentSystem;
 
 public class AddReportFunctions
 {
-	public static void uploadnewReport(String author, String date, String title ,String content, int status)
+	public static boolean uploadnewReport(String author, String date, String title ,String content, int status)
 	{
 		
 		MethodOutcome outcome = App.rms.createNewReport(App.ctx);
@@ -32,6 +32,6 @@ public class AddReportFunctions
 			default: report.setStatus(DiagnosticReportStatusEnum.FINAL);break;
 		}
 		
-		
+		return true;
 	}
 }

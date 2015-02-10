@@ -1,0 +1,8 @@
+package de.uniluebeck.imi.mio.fhirProject.view;
+
+import javax.swing.JFrame;
+
+public class CLocation extends JFrame
+{
+
+}
