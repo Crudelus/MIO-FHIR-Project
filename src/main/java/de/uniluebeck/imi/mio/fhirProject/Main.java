@@ -34,7 +34,7 @@ public class Main
 	    
 
 	    //MIODeviceSystem initialize
-	    MIODeviceSystem deviceManager = new MIODeviceSystem(serverBase, context, null); //TODO: wir brauchen die ID für MIO krankenhaus
+	    MIODeviceSystem deviceManager = new MIODeviceSystem(serverBase, context, patientManagement.getHospitalID());
 	    
 	    // Scenario:   
 	    // Get parameters for patient admission

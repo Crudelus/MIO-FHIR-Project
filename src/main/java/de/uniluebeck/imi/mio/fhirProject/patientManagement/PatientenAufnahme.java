@@ -68,7 +68,7 @@ public class PatientenAufnahme {
     		
         	//MyEntering(IGenericClient client,FhirContext ctx,List<MyName> name, int gender, DateTimeDt birthDate, List<MyAddress> address, int maritalStatus, int admClass, String diagnosisICD,String diagnosisText,Practitioner doctor)
 //        	new MyEntering(client, ctx, name, gender, birthDate, address, maritalStatus, admClass, diagnosisICD, diagnosisText, docId, docName);
-    		new MyEntering(client, ctx, patParams, admParams);
+//   		new MyEntering(client, ctx, patParams, admParams); //TODO: habe ich auskommentiert, da es einen Fehler geworfen hat, Daniel
 	}
 	System.out.println("###### finished");
     }

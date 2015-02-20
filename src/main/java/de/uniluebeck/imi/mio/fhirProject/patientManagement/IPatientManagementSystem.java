@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IPatientManagementSystem {
 	
