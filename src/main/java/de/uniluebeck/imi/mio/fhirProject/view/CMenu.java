@@ -21,7 +21,7 @@ public class CMenu extends JMenu
 	 * Here you will find the methods
 	 */
 	
-	public CMenu()
+	private CMenu()
 	{
 		this.initComponents();
 		this.addComponents();
