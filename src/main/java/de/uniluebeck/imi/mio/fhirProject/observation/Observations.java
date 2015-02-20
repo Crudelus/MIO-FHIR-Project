@@ -1,6 +1,6 @@
 package de.uniluebeck.imi.mio.fhirProject.observation;
 
-import patientManagement.AdmissionParameters;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionParameters;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Claim.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
@@ -8,7 +8,7 @@ import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import de.uniluebeck.imi.mio.fhirProject.interfaces.AdmissionContainer;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionContainer;
 import de.uniluebeck.imi.mio.fhirProject.interfaces.IObservation;
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.IPatientManagementSystem;
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientCreationParameters;
