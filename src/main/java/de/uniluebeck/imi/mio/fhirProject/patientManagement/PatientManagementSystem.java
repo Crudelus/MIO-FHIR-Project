@@ -30,9 +30,12 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	private DoctorCreation doctorCreation;
 	private NurseCreation nurseCreation;
 	
+	private AdmissionSystem admissionSystem;
+	
 	private IdDt hospitalID;
 	
 	private List<IdDt> compositionList;
+		
 	
 	public PatientManagementSystem(FhirContext inContext, IGenericClient inClient)
 	{
@@ -53,8 +56,11 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		
 		// Create nurses
 		nurseCreation = new NurseCreation(client);
-			
+	
+		// Create admission system
+		admissionSystem = new AdmissionSystem(context, client);		
 	}
+	
 
     @Override
     public IdDt getHospitalID()
@@ -62,19 +68,32 @@ public class PatientManagementSystem implements IPatientManagementSystem{
         return infrastructure.getHospitalID(); 
     }
     
+    /**
+     * Create admission container with planned visit encounter using the input parameters
+     */
 	@Override
 	public AdmissionContainer planAdmission(PatientCreationParameters patientParameters, 
-								 AdmissionParameters admissionParameters) 
-	{		
-		// TODO: Ensure that the following is done:
-		// Create new Admission Container:
-		// Create patient if not existing yet
-		// Create condition 
-		// Create visit with status 'planned'
-	
-		MyEntering entering = new MyEntering(client, context, patientParameters, admissionParameters, hospitalID, patientCreation ); 
-		AdmissionContainer admission = entering.getAdmission();
+								 			AdmissionParameters admissionParameters) 
+	{	
+		AdmissionContainer admission = admissionSystem.createPlannedVisitEncounter(patientParameters, admissionParameters, hospitalID, patientCreation);
 			
+		return admission;
+	}
+	
+
+	/**
+	 * Add adm encounter to input admission container using the input parameters
+	 */
+	@Override
+	public AdmissionContainer admitPatient(AdmissionContainer admission,							
+							AdmissionParameters admParams,
+							ResourceReferenceDt targetOrganizationReference,
+							long duration) 
+	{    
+		admissionSystem.addAdmissionEncounter(admission, admParams, duration, targetOrganizationReference);
+			
+		// TODO: Note: Arztbrief is implemented (createComposition)
+				
 		return admission;
 	}
 	
@@ -129,32 +148,6 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	}
 
 	
-	// TODO: SOMETHING
-	@Override
-	public AdmissionContainer admitPatient(AdmissionContainer admission,
-							PatientCreationParameters patient,
-							AdmissionParameters parameters,
-							boolean planned) 
-	{    
-		// TODO: This must be used to expand the existing admission container
-		// TODO: Allow system to do both planning and admission at once for scenario birth
-		// TODO: Note: Arztbrief is implemented (createComposition)
-		
-		/*
-		AdmissionContainer admission = new MyEntering(client, context, patient, parameters, hospitalID).getAdmission(); 
-	    		
-		if(planned)
-		{
-			admission.visit.setStatus(EncounterStateEnum.PLANNED);
-			// TODO Update server
-		}
-		
-		// Send ID to patientCreation for later deletion
-		patientCreation.addPatientToList(admission.patient.getId());
-		
-		*/
-		return admission;
-	}
 
 	@Override
 	public List<Practitioner> getNurses() {
@@ -233,7 +226,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 
 		beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(transferContainer.diagnosisICD));
 		
-		//TODO: add narrative (diagnosisDescription) to encouter reason	
+		//TODO: add narrative (diagnosisDescription) to encounter reason	
 						
 		return executePatientTransfer(admission, transferContainer, beginningEncounter, beginningHospitalization,
 				false);
@@ -265,7 +258,9 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		// TODO Update encounters on server 
 		
 		beginningEncounter.setHospitalization(beginningHospitalization);
-		infrastructure.uploadEncounter(client, beginningEncounter);
+		
+		// TODO: Store id of encounter in AdmissionSystem
+		admissionSystem.createEncounter(client, beginningEncounter);
 		admission.adm = beginningEncounter;
 	
 		// TODO fix return value
@@ -274,8 +269,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	
 	@Override
 	public void clearEntries() {
-				
-		// TODO: Remove encounters etc
+
+		// TODO etc
 		
 		// Remove nurses
         nurseCreation.removeAllNurses();
@@ -287,6 +282,9 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		patientCreation.removeAllPatients();
 				
 		// Remove default infrastructure
-        infrastructure.wipeInfrastructure(client);        
+        infrastructure.wipeInfrastructure(client);
+        
+        // Remove all encounters 
+        admissionSystem.removeAllEncounters();
 	}
 }

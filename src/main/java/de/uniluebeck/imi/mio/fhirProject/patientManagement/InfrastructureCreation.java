@@ -29,8 +29,8 @@ public class InfrastructureCreation {
 	private IdentifierDt hospitalIdentifier;
 	private IdDt hospitalID;
 	
-	private IdDt imcID;	// TODO set
-	private IdDt birthStationID;// TODO set
+	private IdDt imcID;
+	private IdDt birthStationID;
 	
 	
 	public InfrastructureCreation(FhirContext inContext, IGenericClient inClient)
@@ -150,10 +150,9 @@ public class InfrastructureCreation {
 		birthStationRoomLocation.setPartOf(birthStationResource);
 		birthStationRoomLocation.setName("BS-01");
 		birthStationRoomLocation.setId(uploadLocation(client, birthStationRoomLocation));
-
 		
 		
-		createLocation(birthStationLocation, client, birthStationAddress, birthStation, birthStationRoomLocation);
+		birthStationID = createLocation(birthStationLocation, client, birthStationAddress, birthStation, birthStationRoomLocation);
 		
 		
 
@@ -230,8 +229,7 @@ public class InfrastructureCreation {
 		AddressDt imcAddress = createAddress("Musterstrasse 1, Abteilung 4", "Hamburg", "Hamburg", "22113", "Germany");
 		
 		Location imcLocation= new Location();
-		
-		
+				
 		// Create room in IMC
 		AddressDt imcRoomAddress = createAddress("Musterstrasse 1, Abteilung 4", "Hamburg", "Hamburg", "22113", "Germany");
 		imcRoomAddress.addLine("IMC-01");
@@ -242,16 +240,7 @@ public class InfrastructureCreation {
 		imcRoomLocation.setId(uploadLocation(client, imcRoomLocation));
 		imcRoomLocation.setName("IMC-01");
 		
-		createLocation(imcLocation, client, imcAddress, imcStation, imcRoomLocation);
-		
-		
-		
-
-		
-		
-		
-		
-		
+		imcID = createLocation(imcLocation, client, imcAddress, imcStation, imcRoomLocation);
 		
 		
 		/*
@@ -359,10 +348,8 @@ public class InfrastructureCreation {
 				.delete()
 				.resourceById(id)
 				.execute();
-			}
-			
-		}
-		
+			}			
+		}		
 	}
 	
 	
@@ -394,10 +381,8 @@ public class InfrastructureCreation {
 				.delete()
 				.resourceById(id)
 				.execute();
-			}
-			
-		}
-		
+			}			
+		}		
 	}
 	
 	
@@ -412,15 +397,22 @@ public class InfrastructureCreation {
 	public IdDt uploadOrganization(IGenericClient client, Organization organization)
 	{
 		
-		MethodOutcome  outcome = client.create().resource(organization).prettyPrint().encodedXml().execute();
+		MethodOutcome  outcome = client
+							.create()
+							.resource(organization)
+							.prettyPrint()
+							.encodedXml()
+							.execute();
+		
 		IdDt id = outcome.getId();
 		String idPart = id.getIdPart();
 		String elementSpecificId = id.getBaseUrl();
 		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
-
 		
-		return idNonVersioned;
+		// Set ID on local patient object
+        organization.setId(idNonVersioned);	
 		
+		return idNonVersioned;		
 	}
 	
 	
@@ -435,17 +427,23 @@ public class InfrastructureCreation {
 	 * @return The non-versioned technical ID of the location
 	 */
 	public IdDt uploadLocation(IGenericClient client, Location location)
-	{
+	{		
+		MethodOutcome  outcome = client
+				.create()
+				.resource(location)
+				.prettyPrint()
+				.encodedXml()
+				.execute();
 		
-		MethodOutcome  outcome = client.create().resource(location).prettyPrint().encodedXml().execute();
 		IdDt id = outcome.getId();
 		String idPart = id.getIdPart();
 		String elementSpecificId = id.getBaseUrl();
 		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
 
-		
-		return idNonVersioned;
-		
+        // Set ID on local patient object
+        location.setId(idNonVersioned);         
+	
+		return idNonVersioned;		
 	}
 	
 	
@@ -457,18 +455,19 @@ public class InfrastructureCreation {
 	 * @param location
 	 * @return The non-versioned technical ID of the location
 	 */
-	public IdDt uploadComposition(IGenericClient client, Composition compositon)
+	public IdDt uploadComposition(IGenericClient client, Composition composition)
 	{
 		
-		MethodOutcome  outcome = client.create().resource(compositon).prettyPrint().encodedXml().execute();
+		MethodOutcome  outcome = client.create().resource(composition).prettyPrint().encodedXml().execute();
 		IdDt id = outcome.getId();
 		String idPart = id.getIdPart();
 		String elementSpecificId = id.getBaseUrl();
 		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
 
+        // Set ID on local patient object
+		composition.setId(idNonVersioned);         
 		
-		return idNonVersioned;
-		
+		return idNonVersioned;		
 	}
 	
 	
@@ -480,6 +479,7 @@ public class InfrastructureCreation {
 	 * @param encounter
 	 * @return The non-versioned technical ID of the location
 	 */
+	/*
 	public IdDt uploadEncounter(IGenericClient client, Encounter encounter)
 	{
 		
@@ -489,11 +489,12 @@ public class InfrastructureCreation {
 		String elementSpecificId = id.getBaseUrl();
 		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
 
+		// Set ID on local patient object
+		encounter.setId(idNonVersioned); 				
 		
-		return idNonVersioned;
-		
+		return idNonVersioned;		
 	}
-	
+	*/
 	
 	/**
 	 * This method creates a location for a given organization
@@ -502,7 +503,7 @@ public class InfrastructureCreation {
 	 * @param address
 	 * @param organization
 	 */
-	public void createLocation(
+	IdDt createLocation(
 			Location organizationLocation, 
 			IGenericClient client, 
 			AddressDt address, 
@@ -528,10 +529,12 @@ public class InfrastructureCreation {
 		organizationLocationsList.add(organizationLocationReference);
 		organizationLocationsList.add(organizationRoomLocationReference);
 		
-		organizationLocation.setId(uploadLocation(client, organizationLocation));
+		IdDt result_id = uploadLocation(client, organizationLocation);
+		organizationLocation.setId(result_id);
 
 		organization.setLocation(organizationLocationsList);
 		
+		return result_id;
 	}
 	
 	/**
@@ -557,8 +560,7 @@ public class InfrastructureCreation {
 		address.setZip(zip);
 		address.setCountry(country);
 		
-		return address;
-				
+		return address;				
 	}
 	
 	
@@ -577,8 +579,7 @@ public class InfrastructureCreation {
 			String stationName, 
 			IGenericClient client,
 			ResourceReferenceDt organizationReference)
-	{
-		
+	{		
 		organization.setType(OrganizationTypeEnum.HOSPITAL_DEPARTMENT);
 		
 		// Specify the superior organization e.g. the hospital where the station is located
@@ -587,11 +588,11 @@ public class InfrastructureCreation {
 		// Give the station a name
 		organization.setName(stationName);
 		
+		// This is now done internally in uploadOrganization
 		// Upload the station to the server and set a valid technical-ID
-		organization.setId(uploadOrganization(client, organization));
+		//organization.setId(uploadOrganization(client, organization));
 		
 		// Create a resource reference
-		organizationReference.setReference(organization.getId());
-		
+		organizationReference.setReference(organization.getId());		
 	}	
 }

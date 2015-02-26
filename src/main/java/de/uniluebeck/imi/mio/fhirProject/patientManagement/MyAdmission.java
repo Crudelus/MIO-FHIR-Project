@@ -122,129 +122,7 @@ public class MyAdmission {
 	System.out.println("###### Encounter erfolgreich erstellt.");
     }
     
-    
-    
-    
-    /**
-     * Admission of existing patient
-     * @param client
-     * @param patId: of Type IdDt
-     * @param admClass: integer (1-8)
-     * @param indication
-     * @param docId
-     */
-    /*
-    public MyAdmission(IGenericClient client, 
-			IdDt patId, 
-			EncounterClassEnum admClass, 
-    		IdDt indicationID,
-    		IdDt docId,
-    		IdDt station,
-    		IdDt hospital,
-    		boolean reAdmission) {
 
-	// big encounter to record the whole visit of the patient
-	visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000));
-	visit.setStatus(EncounterStateEnum.IN_PROGRESS);
-	visit.setClassElement(admClass);
-//	giveAdmClass(admClass);
-	visit.setSubject(new ResourceReferenceDt(patId));
-	visit.addParticipant().setIndividual(new ResourceReferenceDt(docId));	
-	visit.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));
-	visit.setIndication(new ResourceReferenceDt(indicationID));
-	
-	
-	// small encounter for admission of the patient: part of the visit-Encounter
-        admission.addIdentifier("http://kh-hh.de/mio/encounters","Adm-"+(int)(Math.random()*1000));
-        admission.setStatus(EncounterStateEnum.IN_PROGRESS);
-        admission.setClassElement(admClass);
-//        giveAdmClass(admClass);
-        admission.setSubject(new ResourceReferenceDt(patId));
-        admission.addParticipant().setIndividual(new ResourceReferenceDt(docId));	
-        admission.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));
-        admission.setIndication(new ResourceReferenceDt(indicationID));
- 
-        hosp.addAccomodation().setBed(new ResourceReferenceDt(station));
-        hosp.setReAdmission(reAdmission);
-        admission.setHospitalization(hosp); 
-                
-        
-        
-//       TODO: Would like to have a static ID for the hospital!!        
-//        admission.setServiceProvider(new ResourceReferenceDt(hospital));
-              
-        //setNarrativeWithId(patId);
-	NarrativeDt display = new NarrativeDt();
-	display.setDiv("Aufnahme: "+admission.getIdentifier()
-			+" des Patienten "+patId);
-	admission.setText(display);
-
-	
-	System.out.println("###### 5.2. Encounter wird auf den Server geladen...");
-	
-	System.out.println("###### 5.3. Encounter wird auf den Server geladen...");
-        MethodOutcome outcomeV = client
-                .create()
-                .resource(visit)
-                .prettyPrint()
-                .encodedJson()
-                .execute();
-        IdDt idV = outcomeV.getId();
-        
-        System.out.println("###### 5.2. Visit-ID: "+idV);
-        String elementSpecificIdV = idV.getBaseUrl();
-        String idPartV = idV.getIdPart();
-        IdDt idNonVersionedV = new IdDt(elementSpecificIdV+"/"+idV.getResourceType()+"/"+idPartV);
-        visit.setId(idNonVersionedV);  
-        admission.setPartOf(new ResourceReferenceDt(idNonVersionedV));
-        
-        
-        MethodOutcome outcome = client
-                .create()
-                .resource(admission)
-                .prettyPrint()
-                .encodedJson()
-                .execute();
-        IdDt id = outcome.getId();
-        System.out.println("###### 5.3. Encounter-ID: "+id);
-
-        String elementSpecificId = id.getBaseUrl();
-        String idPart = id.getIdPart();
-        IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-        admission.setId(idNonVersioned);
-        
-        
-	System.out.println("###### Encounter erfolgreich erstellt.");
-    }
-    */
-    
-    
-    
-//    private void giveAdmClass(int admClass){
-//	switch(admClass){
-//		case 1:
-//		    admission.setClassElement(EncounterClassEnum.INPATIENT);break;
-//		case 2:
-//		    admission.setClassElement(EncounterClassEnum.OUTPATIENT);break;
-//		case 3:
-//		    admission.setClassElement(EncounterClassEnum.AMBULATORY);break;
-//		case 4:
-//		    admission.setClassElement(EncounterClassEnum.EMERGENCY);break;
-//		case 5:
-//		    admission.setClassElement(EncounterClassEnum.HOME);break;
-//		case 6:
-//		    admission.setClassElement(EncounterClassEnum.FIELD);break;
-//		case 7:
-//		    admission.setClassElement(EncounterClassEnum.DAYTIME);break;
-//		case 8:
-//		    admission.setClassElement(EncounterClassEnum.VIRTUAL);break;
-//		default:
-//		    break;
-//	}
-//    }
-    
-
-    
     private void setNarrative(Patient patient){
 	NarrativeDt display = new NarrativeDt();
 	display.setDiv("Aufnahme: "+admission.getIdentifier()
@@ -252,13 +130,7 @@ public class MyAdmission {
 			+ patient.getNameFirstRep().getGivenAsSingleString());
 	admission.setText(display);
     }
-//    private void setNarrativeWithId(IdDt patId){
-//	NarrativeDt display = new NarrativeDt();
-//	display.setDiv("Aufnahme: "+admission.getIdentifier()
-//			+" des Patienten "+patId);
-//	admission.setText(display);
-//    }
-    
+
     
     /**
      * asks for the encounter object 

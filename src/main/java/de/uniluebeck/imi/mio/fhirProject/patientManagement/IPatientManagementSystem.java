@@ -20,18 +20,18 @@ public interface IPatientManagementSystem {
 	// Admit a new patient:
     //  -Creates patient according to parameters if necessary
     //  -Creates main Encounter and Hospitalization for patient
-	public AdmissionContainer admitPatient(AdmissionContainer admissionContainer,
-											PatientCreationParameters patient,
-											AdmissionParameters parameters,
-											boolean planned);	
+	public AdmissionContainer admitPatient(AdmissionContainer admission,							
+			AdmissionParameters parameters,
+			ResourceReferenceDt targetOrganizationReference,
+			long duration);
             
 	// Transfer a patient to a new station
 	public boolean transferPatient(AdmissionContainer admission, 
-			ResourceReferenceDt targetOrganizationReference,
-			long duration,
-			String diagnosisICD,
-			String diagnosisDescription);	
-            
+									ResourceReferenceDt targetOrganizationReference,
+									long duration,
+									String diagnosisICD,
+									String diagnosisDescription);
+							
     // Get all nurses [references?]
     public List<Practitioner> getNurses();
 	

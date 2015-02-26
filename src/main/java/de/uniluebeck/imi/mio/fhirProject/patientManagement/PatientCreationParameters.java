@@ -10,11 +10,11 @@ public class PatientCreationParameters
 	public String firstName; 
 	public String lastName; 
 	public String maidenName; 
-	public DateTimeDt birthDate; // like 1732-12-24
+	public DateTimeDt birthDate; // format 1732-12-24
 	public AdministrativeGenderCodesEnum gender;
 	public MaritalStatusCodesEnum maritalStatus;
 	
-	// address:
+	// Address:
 	public String line;
 	public String zip;
 	public String city;
@@ -31,7 +31,7 @@ public class PatientCreationParameters
 		this.gender = other.gender;
 		this.maritalStatus = other.maritalStatus;
 
-		// address:
+		// Address:
 		this.line = other.line;
 		this.zip = other.zip;
 		this.city = other.city;		
