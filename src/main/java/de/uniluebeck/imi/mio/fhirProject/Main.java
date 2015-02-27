@@ -34,7 +34,7 @@ public class Main
 	    
 
 	    //MIODeviceSystem initialize
-	    MIODeviceSystem deviceManager = new MIODeviceSystem(serverBase, context, patientManagement.getHospitalID());
+	    MIODeviceSystem deviceManager = new MIODeviceSystem(serverBase, context, patientManagement);
 	    
 	    // Scenario:   
 	    // Get parameters for patient admission

@@ -3,6 +3,7 @@
  */
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -23,29 +24,37 @@ public interface IDevice {
     public Device getDevice(IdDt deviceId);
     
     /**
-     * @param patId reference to a Patient the device is affixed to;
-     * @return A list of Devices for this Patient, can be empty
-     */
-    public List<Device> getDeviceForPatient(IdDt patId);
-    
-    
-    /**
-     * @param patId reference to a Patient
-     * @return A list of Observations for this Patients, can be empty
-     */
-    public List<Observation> getObservationsForPatient(IdDt patId);  
-    
-    /**
-     * @param patId reference to a Patient
-     * @return true if Patient has Devices affixed to, else false
-     */
-    public boolean PatientHasDevice(IdDt patId);
-    
-    /**
      * @param devID reference ID for device
      * @param locID reference ID for location
      * @return true if updated, else false
      */
     public boolean updateDeviceLocation(IdDt devID, IdDt locID);
     
+    /**
+	 * Creates an overview of Devices that were used on the Patient and the time of use.
+	 * 
+	 * @param patId - The Patient's unique ID
+	 * @return ArrayList<DeviceAndTimeForPatient> - ArrayList of objects containing the Device and Time...
+	 */
+	public ArrayList<DeviceAndTimeForPatient> getDeviceAndTimeForPatient(IdDt patId);
+    
+	/**
+	 * Creates a DiagnosticReport containing laboratory data
+	 * 
+	 * @param diagnosticOrderId
+	 * @param patId
+	 * @param performerId
+	 * @return IdDt of the created DiagnosticReport
+	 */
+	public IdDt newLaboratoryReport(IdDt diagnosticOrderId, IdDt patId, IdDt performerId);
+	
+	/**
+	 * Creates a DeviceObservationReport containing some data
+	 * 
+	 * @param diagnosticOrderId
+	 * @param patId
+	 * @param deviceId
+	 * @return IdDt of the created DeviceObservationReport
+	 */
+	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId);
 }

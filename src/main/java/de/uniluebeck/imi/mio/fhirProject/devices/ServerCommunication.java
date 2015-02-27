@@ -37,8 +37,8 @@ public class ServerCommunication {
 	 *         server use .getID()
 	 */
 	public MethodOutcome createRessourceOnServer(IResource resource) {
-		MethodOutcome outcome = client.create().resource(resource)
-				.prettyPrint().encodedJson().execute();
+		MethodOutcome outcome = client.create().resource(resource).execute();
+				//.prettyPrint().encodedJson().execute();
 
 		generatedObjects.add(outcome.getId());
 		return outcome;

@@ -7,175 +7,186 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import de.uniluebeck.imi.mio.fhirProject.patientManagement.IPatientManagementSystem;
 
 /**
- * @author Daniel Rehmann, Simon Baumhof, Katharina Merkel
+ * @author Daniel Rehmann, Simon Baumhof, Katharina Merkel, Andrea Essenwanger
  * 
  */
 public class MIODeviceSystem implements IDevice {
-    FhirContext ctx;
-    private ServerCommunication communicator;
-    IdDt hospital;
+	FhirContext ctx;
+	private ServerCommunication communicator;
+	IPatientManagementSystem patSys;
+	DiagnosticsReportFactory dFactory;
 
-    /**
-     * @param serverBase
-     * @param ctx
-     * @param hospital 
-     */
-    public MIODeviceSystem(String serverBase, FhirContext ctx, IdDt hospital ) {
-	this.ctx = ctx;
-	communicator = new ServerCommunication(ctx,
-		    serverBase, hospital);
-	this.hospital=hospital;
-    }
-
-    public void createBasicInfrastructure() {
-	Device tokometer = new Device();
-	tokometer.setUdi("toko1");
-	Organization birthstation = communicator.getStation("Geburtsstation"); // Birthstation im original Datensatz
-	tokometer.setOwner(new ResourceReferenceDt(birthstation)); //Get via infrastructure 
-	System.out.println("");
-	communicator.createRessourceOnServer(tokometer);
-// 	ResourceReferenceDt bs01 = birthstation.getLocation().get(0);
-//	tokometer.setLocation(bs01);    //Get via infrastructure 	
-//	communicator.createRessourceOnServer(tokometer); //nach diesem Schema alle geräte erstellen
-	
-	
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * de.uniluebeck.imi.mio.fhirProject.devices.IDevice#getDevice(ca.uhn.fhir
-     * .model.primitive.IdDt)
-     */
-    @Override
-    public Device getDevice(IdDt deviceId) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * de.uniluebeck.imi.mio.fhirProject.devices.IDevice#getDeviceForPatient
-     * (ca.uhn.fhir.model.primitive.IdDt)
-     */
-    @Override
-    public List<Device> getDeviceForPatient(IdDt patId) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * de.uniluebeck.imi.mio.fhirProject.devices.IDevice#getObservationsForPatient
-     * (ca.uhn.fhir.model.primitive.IdDt)
-     */
-    @Override
-    public List<Observation> getObservationsForPatient(IdDt patId) {
-	// TODO Auto-generated method stub
-	return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * de.uniluebeck.imi.mio.fhirProject.devices.IDevice#PatientHasDevice(ca
-     * .uhn.fhir.model.primitive.IdDt)
-     */
-    @Override
-    public boolean PatientHasDevice(IdDt patId) {
-	// TODO Auto-generated method stub
-	return false;
-    }
-
-
-    public boolean setPatient(IdDt devID, IdDt patID) {
-
-	Device dev = communicator.getDevice(devID);
-	dev.setPatient(new ResourceReferenceDt(patID));
-	return communicator.updateDevice(dev);
-
-    }
-
-    @Override
-    public boolean updateDeviceLocation(IdDt devID, IdDt locID) {
-	Device dev = communicator.getDevice(devID);
-	dev.setLocation(new ResourceReferenceDt(locID));
-	return communicator.updateDevice(dev);
-    }
-
-    public void delAll() {
-	communicator.deleteAll();
-    }
-
-    public boolean delDev(String id) {
-	IdDt deviceId = new IdDt("Device", id);
-	communicator.deleteResourceOnServer(deviceId);
-	return true;
-    }
-
-    /**
-     * @param devId
-     * @return ResourceReferenceDt for the Location
-     */
-    public ResourceReferenceDt getDeviceLocation(IdDt devId) {
-	Device dev = communicator.getDevice(devId);
-	return dev.getLocation();
-    }
-
-    /**
-     * @param patId
-     * @return
-     */
-    public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(
-	    IdDt patId) {
-    	
-    	return communicator.getObservationForPatient(
-		patId);
-
-
-    }
-
-    /**
-     * @param obsRepForPat
-     * @return {@link ArrayList} of {@link Device} containing all devices for Patient
-     */
-    public ArrayList<DeviceAndTimeForPatient> getDeviceAndTimeForPatient(
-	    ArrayList<DeviceObservationReport> obsRepForPat) {
-
-	ArrayList<DeviceAndTimeForPatient> devicesForPat = new ArrayList<>();
-
-	for (DeviceObservationReport report : obsRepForPat) {
-
-	    devicesForPat.add(new DeviceAndTimeForPatient(report.getInstant()
-		    .getValue(), report.getSource().getReference()));
+	/**
+	 * @param serverBase
+	 * @param ctx
+	 * @param hospital
+	 */
+	public MIODeviceSystem(String serverBase, FhirContext ctx, IPatientManagementSystem patSys) {
+		this.ctx = ctx;
+		this.patSys = patSys;
+		this.communicator = new ServerCommunication(ctx, serverBase, patSys.getHospitalID());
+		this.dFactory = new DiagnosticsReportFactory(ctx, communicator, patSys.getHospitalID());
+		/*
+		 * Create Basic Infastructure
+		 */
+		this.createBasicInfrastructure();
 	}
 
-	return devicesForPat;
-    }
+	/**
+	 * Creates the Tokometer
+	 */
+	public void createBasicInfrastructure() {
+		/*
+		 * Create Tokometer; add attributes
+		 */
+		Device tokometer = new Device();
+		tokometer.setUdi("toko1");
+		tokometer.setManufacturer("Draeger");
+		tokometer.setModel("TokoMaster 5000");
+		tokometer.setOwner(new ResourceReferenceDt(patSys.getBirthStation()));
 
-    /**
-     * @return all devices for Patient
-     */
-    public List<Device> getHospitalDevices() {
-	List<Device> devices = communicator.getAllDevices();
+		/*
+		 * Create Tokometer on Server
+		 */
+		MethodOutcome m = communicator.createRessourceOnServer(tokometer);
+		IdDt tokoID = m.getId();
 
-	return devices;
-    }
+		/*
+		 * For Testing...
+		 */
+		//
+		// DiagnosticOrder order = new DiagnosticOrder();
+		//
+		//
+		// m = communicator.createRessourceOnServer(order);
+		// IdDt orderID = m.getId();
+		//
+		// DiagnosticsReportFactory drf = new DiagnosticsReportFactory(ctx,
+		// communicator, hospital);
+		// drf.newDeviceObservationReport(tokoID, orderID, new IdDt("Patient",
+		// "8090"));
+		//
+		// Practitioner pract = new Practitioner();
+		//
+		// m = communicator.createRessourceOnServer(pract);
+		// IdDt practID = m.getId();
+		//
+		// drf.newLaboratoryReport(orderID, new IdDt("Patient",
+		// "8090"),practID);
+		//
+		// // ResourceReferenceDt bs01 = birthstation.getLocation().get(0);
+		// // tokometer.setLocation(bs01); //Get via infrastructure
+		// // communicator.createRessourceOnServer(tokometer); //nach diesem
+		// Schema alle geräte erstellen
+		//
+		//
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.uniluebeck.imi.mio.fhirProject.devices.IDevice#getDevice(ca.uhn.fhir
+	 * .model.primitive.IdDt)
+	 */
+	@Override
+	public Device getDevice(IdDt deviceId) {
+		Device dev = communicator.getDevice(deviceId);
+		return dev;
+	}
+
+
+	public boolean setPatient(IdDt devID, IdDt patID) {
+		Device dev = communicator.getDevice(devID);
+		dev.setPatient(new ResourceReferenceDt(patID));
+		return communicator.updateDevice(dev);
+
+	}
+
+	@Override
+	public boolean updateDeviceLocation(IdDt devID, IdDt locID) {
+		Device dev = communicator.getDevice(devID);
+		dev.setLocation(new ResourceReferenceDt(locID));
+		return communicator.updateDevice(dev);
+	}
+
+	public void delAll() {
+		communicator.deleteAll();
+	}
+
+	public boolean delDev(String id) {
+		IdDt deviceId = new IdDt("Device", id);
+		communicator.deleteResourceOnServer(deviceId);
+		return true;
+	}
+
+	/**
+	 * @param devId
+	 * @return ResourceReferenceDt for the Location
+	 */
+	public ResourceReferenceDt getDeviceLocation(IdDt devId) {
+		Device dev = communicator.getDevice(devId);
+		return dev.getLocation();
+	}
+
+	/**
+	 * @param patId
+	 * @return
+	 */
+	public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(
+			IdDt patId) {
+
+		return communicator.getObservationForPatient(patId);
+
+	}
+
+	@Override
+	public ArrayList<DeviceAndTimeForPatient> getDeviceAndTimeForPatient(IdDt patId) {
+		/*
+		 * Get DeviceObservationReports for Patient
+		 */
+		ArrayList<DeviceObservationReport> obsRepForPat = communicator.getObservationForPatient(patId);
+		
+		/*
+		 * Create List of DeviceAndTimeForPatient :)
+		 */
+		ArrayList<DeviceAndTimeForPatient> devicesForPat = new ArrayList<>();
+		for (DeviceObservationReport report : obsRepForPat) {
+			devicesForPat.add(new DeviceAndTimeForPatient(report.getInstant()
+					.getValue(), report.getSource().getReference()));
+		}
+		return devicesForPat;
+	}
+
+	/**
+	 * @return all devices of the hospital
+	 */
+	public List<Device> getHospitalDevices() {
+		List<Device> devices = communicator.getAllDevices();
+
+		return devices;
+	}
+	
+	@Override
+	public IdDt newLaboratoryReport(IdDt diagnosticOrderId, IdDt patId, IdDt performerId){
+		IdDt labRep = dFactory.newLaboratoryReport(diagnosticOrderId, patId, performerId);
+		return labRep;
+	}
+	
+	@Override
+	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId){
+		IdDt devRep = dFactory.newDeviceObservationReport(deviceId, diagnosticOrderId, patId);
+		return devRep;
+	}
+	
 }

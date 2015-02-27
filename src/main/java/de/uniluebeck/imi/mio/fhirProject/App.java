@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import de.uniluebeck.imi.mio.fhirProject.devices.MIODeviceSystem;
 import de.uniluebeck.imi.mio.fhirProject.report.CReportManagmentSystem;
 import de.uniluebeck.imi.mio.fhirProject.report.DeviceCommunicationSystem;
 
@@ -19,7 +22,10 @@ public class App
 	
     public static void main( String[] args )
     {
-    		
+    	String serverBase = "http://fhirtest.uhn.ca/base";
+
+	    // Server infrastructure:
+	    IGenericClient client = ctx.newRestfulGenericClient(serverBase);
       
     }
     

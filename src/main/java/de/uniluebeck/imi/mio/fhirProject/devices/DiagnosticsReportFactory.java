@@ -13,7 +13,9 @@ import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport.VirtualDeviceChan
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
@@ -24,19 +26,26 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 public class DiagnosticsReportFactory {
 	private ServerCommunication communicator;
 
-	public DiagnosticsReportFactory(FhirContext ctx, String serverBase,
+	public DiagnosticsReportFactory(FhirContext ctx, ServerCommunication comm,
 			IdDt hospital) {
-		hospital = new IdDt("Organization", "4237");
-		communicator = new ServerCommunication(ctx, serverBase, hospital);
+		
+		communicator = comm;
 	}
 
-	public IdDt newLaboratoryReport(IdDt diagOrderId, IdDt patId) {
+	public IdDt newLaboratoryReport(IdDt diagOrderId, IdDt patId, IdDt performer) {
 
 		DiagnosticReport lab = new DiagnosticReport();
 		lab.setServiceCategory(new CodeableConceptDt(
 				"http://hl7.org/fhir/v2/vs/0074", "LAB"));
 		lab.addRequestDetail().setReference(diagOrderId);
 		lab.setSubject(new ResourceReferenceDt(patId));
+		lab.setPerformer(new ResourceReferenceDt(performer));
+		lab.setStatus(DiagnosticReportStatusEnum.FINAL);
+		
+		NarrativeDt ndt = new NarrativeDt();
+		ndt.setDiv("Simon ist cool");
+		ndt.setStatus(NarrativeStatusEnum.GENERATED);
+		lab.setText(ndt);
 
 		// leucocytes
 		QuantityDt leuko = new QuantityDt();
