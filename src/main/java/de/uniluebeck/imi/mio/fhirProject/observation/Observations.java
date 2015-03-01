@@ -1,3 +1,4 @@
+/*
 package de.uniluebeck.imi.mio.fhirProject.observation;
 
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionParameters;
@@ -65,10 +66,11 @@ public class Observations implements IObservation {
 	}
 
 	public boolean changeMaritialStatus(Patient patient,
-			MaritalStatusCodesEnum mariage) {
+										MaritalStatusCodesEnum mariage) 
+	{
 		// TODO Auto-generated method stub
 		patient.setMaritalStatus(mariage);
-		
+				
 		return true;
 	}
 
@@ -91,3 +93,4 @@ public class Observations implements IObservation {
 	}
 
 }
+*/

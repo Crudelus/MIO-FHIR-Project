@@ -1,5 +1,8 @@
 package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -20,12 +23,16 @@ public class DoctorCreation {
 	//class variables
 	IGenericClient client;
 	
+    private List<IdDt> doctorIds;
+    
 	//Generating the FhirContext-object is expensive. No need to create 
 	//this object for every interaction with the server. The object should be
 	//created in the main.
 	public DoctorCreation(IGenericClient client) {
 		
 		this.client = client;
+		
+		doctorIds = new ArrayList<IdDt>();
 		createAll();
 	}
 	
@@ -34,16 +41,16 @@ public class DoctorCreation {
 		
 		createDoctor("http://www.kh-hh.de/mio/practitioner", "1337", "Laser", 
 				"Eduard", "Geverdesstraße 9", "23554", "Lübeck", AdministrativeGenderCodesEnum.M);
-		
+
 		createDoctor("http://www.kh-hh.de/mio/practitioner", "1338", "House", 
 				"Gregory", "221B Baker Street", "W1U", "London", AdministrativeGenderCodesEnum.M);
-		
+	
 		createDoctor("http://www.kh-hh.de/mio/practitioner", "1339", "Reid", 
 				"Elliot", "Burton St. 15", "90706", "Seattle", AdministrativeGenderCodesEnum.F);
-		
+
 		createDoctor("http://www.kh-hh.de/mio/practitioner", "1340", "Grey", 
 				"Meredith", "201 S. Jackson St.", "98104", "Los Angeles", AdministrativeGenderCodesEnum.F);
-		
+
 		createDoctor("http://www.kh-hh.de/mio/practitioner", "1341", "Dog", 
 				"Doc", "Hundestraße 12", "23552", "Lübeck", AdministrativeGenderCodesEnum.UNK);
 	}
@@ -88,16 +95,34 @@ public class DoctorCreation {
 		doc.setText(narrative);
 		
 		//upload the resource
-		MethodOutcome outcome = client
-		.create()
-		.resource(doc)
-		.prettyPrint()
-		.encodedJson()
-		.execute();
-	
-		IdDt docId = outcome.getId();
+		MethodOutcome  outcome = client
+				.create()
+				.resource(doc)
+				.prettyPrint()
+				.encodedXml()
+				.execute();
 		
-		return docId;
+		IdDt id = outcome.getId();
+        String elementSpecificId = id.getBaseUrl();
+        String idPart = id.getIdPart();
+        IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
+
+		doctorIds.add(idNonVersioned);
+		
+		return idNonVersioned;
+	}
+	
+	public List<Practitioner> getAllDoctors()
+	{
+    	List<Practitioner> doctors = new ArrayList<Practitioner>();
+    	
+    	for(IdDt doctorID : doctorIds)
+    	{    		
+    		Practitioner nurse = client.read(Practitioner.class, doctorID);
+    		doctors.add(nurse);
+    	}
+    	
+    	return doctors;
 	}
 	
 	//This method deletes all doctors using delete
@@ -130,6 +155,4 @@ public class DoctorCreation {
 			.execute();
 		}	
 	}
-	
-
 }

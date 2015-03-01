@@ -112,38 +112,32 @@ public class MyPatient {
         String elementSpecificId = id.getBaseUrl();
         String idPart = id.getIdPart();
         IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-        
+                
         // Set ID on local patient object
-        patient.setId(idNonVersioned);         
-        
-        return idNonVersioned;
+        patient.setId(idNonVersioned);        
+       
+    	return idNonVersioned;
     } 
      
-     /**
-      * Updating current nurse
-      * 
-      * @param nurse current Practitioner to be up to date
-      * @param client  server base
-      * @param oldIDs List of existing nurse-IDs
-      * @param j current index for iterating through oldIDs
-      * @return IdDt of updated nurse
-      */
-     public static void updatePatient(IGenericClient client, Patient patient){
-        // set current nurse ID for updating
-//           patient.setId(patient.getId());
-            
-        //MethodOutcome outcome = client
-             client
-           .update()
-           .resource(patient)
-           .execute();
-        //IdDt id = outcome.getId();
-        // use for nonversioned id:
-            //String elementSpecificId = id.getBaseUrl();
-            //String idPart = id.getIdPart();
-            //IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-        //return id;
-     }
+    /**
+     * Updating current patient
+     * @param client
+     * @param patient
+     */
+     public static boolean updatePatient(IGenericClient client, Patient patient)
+     {    	 
+    	 try {
+ 			client
+ 			.update()
+ 			.resource(patient)
+ 			.execute();
+ 			return true;
+ 		} catch (Exception e) {
+ 			System.err.println("Patient update failed");
+ 			e.printStackTrace();
+ 			return false;
+ 		}    	
+    }
     
     public void setBirthDate(DateTimeDt birthDate) 
     {

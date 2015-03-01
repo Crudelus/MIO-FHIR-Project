@@ -11,14 +11,13 @@ import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
-    
+import de.uniluebeck.imi.mio.fhirProject.devices.ServerCommunication;
 public class PatientCreation {
    
     private IGenericClient client;
     private List<IdDt> patientIds;
-
     
-    public PatientCreation(FhirContext inContext, IGenericClient inClient)
+    public PatientCreation(IGenericClient inClient)
     {       
         this.client = inClient;     
         

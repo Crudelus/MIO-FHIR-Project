@@ -30,7 +30,7 @@ public class Main
 
 	    
 	    // Create and initialize 
-	    IPatientManagementSystem patientManagement = new PatientManagementSystem(context, client);
+	    IPatientManagementSystem patientManagement = new PatientManagementSystem(client);
 	    
 
 	    //MIODeviceSystem initialize
@@ -53,7 +53,7 @@ public class Main
 
 	    // Group 1: Create observation for patient, get nurse [Maybe reference for practitioner would suffice?]
 	    // encounter is known from admission result 
-	    List<Practitioner> practitioners = patientManagement.getNurses();
+	    List<Practitioner> practitioners = patientManagement.getNurseList();
 	        
 	    // Create child
 	    PatientCreationParameters childPatientParameters = null; // < Fill with GUI or terminal input> 
@@ -95,28 +95,5 @@ public class Main
 	    patientManagement.clearEntries();
 	    deviceManager.delAll();
 	  
-	}
-    
+	}    
 }
-
-/*
-
-// Collection of input information for the creation of an Encounter, Hospitalization and Diagnostic Order
-class AdmissionParameters
-{
-    public String reason; // ICD 10
-    Organization station;
-
-    //<diagnostic order parameters> + Composition
-}
-
-
-// Unless other groups need actual objects, references would suffice
-class Admission
-{
-    Encounter encounter;
-    Hospitalization hospitalization;
-    DiagnosticOrder diagnosticOrder;
-	Composition composition;
-}
-*/

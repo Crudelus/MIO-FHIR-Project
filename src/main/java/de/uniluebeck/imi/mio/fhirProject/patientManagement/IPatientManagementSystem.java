@@ -21,9 +21,9 @@ public interface IPatientManagementSystem {
     //  -Creates patient according to parameters if necessary
     //  -Creates main Encounter and Hospitalization for patient
 	public AdmissionContainer admitPatient(AdmissionContainer admission,							
-			AdmissionParameters parameters,
-			ResourceReferenceDt targetOrganizationReference,
-			long duration);
+											AdmissionParameters parameters,
+											ResourceReferenceDt targetOrganizationReference,
+											long duration);
             
 	// Transfer a patient to a new station
 	public boolean transferPatient(AdmissionContainer admission, 
@@ -32,10 +32,13 @@ public interface IPatientManagementSystem {
 									String diagnosisICD,
 									String diagnosisDescription);
 							
-    // Get all nurses [references?]
-    public List<Practitioner> getNurses();
+    // Return list of all default nurse objects
+    public List<Practitioner> getNurseList();
 	
-	// Get all patients [references?]
+    // Return list of all default doctor objects
+    public List<Practitioner> getDoctorList();
+    
+	// Return list of all default patient objects 
 	public List<Patient> getPatientList();
 	
     // Release a patient from the hospital   

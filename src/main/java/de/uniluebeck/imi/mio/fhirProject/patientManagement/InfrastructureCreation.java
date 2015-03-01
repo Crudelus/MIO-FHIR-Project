@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
+
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Composition;
-import ca.uhn.fhir.model.dstu.resource.Encounter;
+
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class InfrastructureCreation {
 	
-	private FhirContext context;
 	private IGenericClient client;
 	
 	private IdentifierDt hospitalIdentifier;
@@ -33,13 +32,12 @@ public class InfrastructureCreation {
 	private IdDt birthStationID;
 	
 	
-	public InfrastructureCreation(FhirContext inContext, IGenericClient inClient)
+	public InfrastructureCreation(IGenericClient inClient)
 	{
-		this.context = inContext;
 		this.client = inClient;
 		
 		try{
-			createInfrastructure(inContext, inClient);
+			createInfrastructure(inClient);
 			
 		}catch(IOException e){
 			
@@ -77,7 +75,7 @@ public class InfrastructureCreation {
 	 * @param client
 	 * @throws IOException
 	 */
-	public void createInfrastructure(FhirContext ctx, IGenericClient client) throws IOException
+	public void createInfrastructure(IGenericClient client) throws IOException
 	{
 		Organization hospital = new Organization();		
 		
@@ -132,7 +130,7 @@ public class InfrastructureCreation {
 		 */
 		Organization birthStation = new Organization();
 		ResourceReferenceDt birthStationResource = new ResourceReferenceDt();
-		createStation(birthStation, hospitalResource, "Birth Station", client, birthStationResource);
+		birthStationID = createStation(birthStation, hospitalResource, "Birth Station", client, birthStationResource);
 		
 		// Create new birth-station location
 		AddressDt birthStationAddress = createAddress("Musterstrasse 1, Abteilung 1", "Hamburg", 
@@ -152,7 +150,7 @@ public class InfrastructureCreation {
 		birthStationRoomLocation.setId(uploadLocation(client, birthStationRoomLocation));
 		
 		
-		birthStationID = createLocation(birthStationLocation, client, birthStationAddress, birthStation, birthStationRoomLocation);
+		createLocation(birthStationLocation, client, birthStationAddress, birthStation, birthStationRoomLocation);
 		
 		
 
@@ -223,7 +221,7 @@ public class InfrastructureCreation {
 		 */
 		Organization imcStation = new Organization();
 		ResourceReferenceDt imcStationReference = new ResourceReferenceDt();
-		createStation(imcStation, hospitalResource, "Intermediate Care", client, imcStationReference);
+		imcID = createStation(imcStation, hospitalResource, "Intermediate Care", client, imcStationReference);
 		
 		// Create IMC-location
 		AddressDt imcAddress = createAddress("Musterstrasse 1, Abteilung 4", "Hamburg", "Hamburg", "22113", "Germany");
@@ -240,7 +238,7 @@ public class InfrastructureCreation {
 		imcRoomLocation.setId(uploadLocation(client, imcRoomLocation));
 		imcRoomLocation.setName("IMC-01");
 		
-		imcID = createLocation(imcLocation, client, imcAddress, imcStation, imcRoomLocation);
+		createLocation(imcLocation, client, imcAddress, imcStation, imcRoomLocation);
 		
 		
 		/*
@@ -445,57 +443,7 @@ public class InfrastructureCreation {
 	
 		return idNonVersioned;		
 	}
-	
-	
-	/**
-	 * This method creates a composition on the server using the specified IGenericClient and 
-	 * retrieves the technical ID. The ID is then shortened and stripped off the appended version
-	 * 
-	 * @param client
-	 * @param location
-	 * @return The non-versioned technical ID of the location
-	 */
-	public IdDt uploadComposition(IGenericClient client, Composition composition)
-	{
-		
-		MethodOutcome  outcome = client.create().resource(composition).prettyPrint().encodedXml().execute();
-		IdDt id = outcome.getId();
-		String idPart = id.getIdPart();
-		String elementSpecificId = id.getBaseUrl();
-		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
 
-        // Set ID on local patient object
-		composition.setId(idNonVersioned);         
-		
-		return idNonVersioned;		
-	}
-	
-	
-	/**
-	 * This method creates an encounter on the server using the specified IGenericClient and 
-	 * retrieves the technical ID. The ID is then shortened and stripped off the appended version
-	 * 
-	 * @param client
-	 * @param encounter
-	 * @return The non-versioned technical ID of the location
-	 */
-	/*
-	public IdDt uploadEncounter(IGenericClient client, Encounter encounter)
-	{
-		
-		MethodOutcome  outcome = client.create().resource(encounter).prettyPrint().encodedXml().execute();
-		IdDt id = outcome.getId();
-		String idPart = id.getIdPart();
-		String elementSpecificId = id.getBaseUrl();
-		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
-
-		// Set ID on local patient object
-		encounter.setId(idNonVersioned); 				
-		
-		return idNonVersioned;		
-	}
-	*/
-	
 	/**
 	 * This method creates a location for a given organization
 	 * @param organizationLocation
@@ -573,7 +521,7 @@ public class InfrastructureCreation {
 	 * @param client
 	 * @param organizationReference
 	 */
-	public void createStation(
+	public IdDt createStation(
 			Organization organization, 
 			ResourceReferenceDt containingResourceReference, 
 			String stationName, 
@@ -586,13 +534,14 @@ public class InfrastructureCreation {
 		organization.setPartOf(containingResourceReference);
 		
 		// Give the station a name
-		organization.setName(stationName);
-		
-		// This is now done internally in uploadOrganization
-		// Upload the station to the server and set a valid technical-ID
-		//organization.setId(uploadOrganization(client, organization));
+		organization.setName(stationName);	
+
+		// Upload the station to the server
+		IdDt stationId = uploadOrganization(client, organization);
 		
 		// Create a resource reference
-		organizationReference.setReference(organization.getId());		
+		organizationReference.setReference(organization.getId());
+		
+		return stationId;
 	}	
 }

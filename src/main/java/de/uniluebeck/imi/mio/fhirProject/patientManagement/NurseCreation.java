@@ -23,23 +23,11 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class NurseCreation {
 
-	private List<IdDt> nurseIds;
 	private IGenericClient client;
+	private List<IdDt> nurseIds;
 
 	public NurseCreation(IGenericClient inClient) {
 		
-		/**
-		 * generates nurses as given in the table below one can choose between
-		 * "CREATING" new nurses on the server (at the same time, the old ones
-		 * are getting deleted) and "UPDATING" existing nurses all IDs of
-		 * existing Nurses are stored in the file "nurseIDs.txt",
-		 * 
-		 * TODO: to make the program work you have to CHANGE THE FILE PATH!!
-		 * (Lines 80, 86) TODO: later on, we have to change the
-		 * ResourceReferences for organizaton and location (Lines 45,46), TODO:
-		 * their settings are commented yet (Lines 191, 194)
-		*/
-
 		client = inClient;
 		nurseIds = new ArrayList<IdDt>(); 
 		
@@ -275,35 +263,7 @@ public class NurseCreation {
     	return nurses;
     }
 	
-	/**
-	 * Updating current nurse
-	 * 
-	 * @param nurse
-	 *            current Practitioner to be up to date
-	 * @param client
-	 *            server base
-	 * @param oldIDs
-	 *            List of existing nurse-IDs
-	 * @param j
-	 *            current index for iterating through oldIDs
-	 * @return IdDt of updated nurse
-	 */
-	/*
-	public static IdDt updateNurse(Practitioner nurse, IGenericClient client,
-			String oldID) {
-		// set current nurse ID for updating
-		nurse.setId(oldID);
-
-		MethodOutcome outcome = client.update().resource(nurse).execute();
-		IdDt id = outcome.getId();
-		// use for nonversioned id:
-		// String elementSpecificId = id.getBaseUrl();
-		// String idPart = id.getIdPart();
-		// IdDt idNonVersioned = new
-		// IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-		return id;
-	}
-	*/
+	
 	/**
 	 * creating current nurse
 	 * 
@@ -314,15 +274,20 @@ public class NurseCreation {
 	 * @return IdDt of updated nurse
 	 */
 	public static IdDt createNurse(Practitioner nurse, IGenericClient client) {
-		MethodOutcome outcome = client.create().resource(nurse).prettyPrint()
-				.encodedJson().execute();
-		IdDt id = outcome.getId();
-		// use for nonversioned id:
-		// String elementSpecificId = id.getBaseUrl();
-		// String idPart = id.getIdPart();
-		// IdDt idNonVersioned = new
-		// IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-		return id;
+
+		MethodOutcome  outcome = client
+				.create()
+				.resource(nurse)
+				.prettyPrint()
+				.encodedXml()
+				.execute();
+		
+        IdDt id = outcome.getId();
+        String elementSpecificId = id.getBaseUrl();
+        String idPart = id.getIdPart();
+        IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
+        		
+		return idNonVersioned;
 	}
 
 	/**

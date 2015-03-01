@@ -31,26 +31,18 @@ import ca.uhn.fhir.rest.client.IGenericClient;
  */
 public class AdmissionSystem {
         
-	private IGenericClient client;
-	private FhirContext ctx;
-    
+	private IGenericClient client;  
     private List<IdDt> encounterIds;
-
 	
-    /**
-     * Constructor of the main admission
-     * @param client
-     * @param ctx
-     * @param patParams
-     * @param admParams
-     * @param hospitalID
-     * @param patientCreation
-     */
-    
-    public AdmissionSystem(FhirContext inCtx, IGenericClient inClient)
-    {	    	
-    	this.ctx = inCtx;
+	/**
+	 *	
+	 * @param inClient
+	 */
+    public AdmissionSystem(IGenericClient inClient)
+    {
     	this.client = inClient;
+    	
+    	encounterIds = new ArrayList<IdDt>();
     }
     
     /**
@@ -64,85 +56,99 @@ public class AdmissionSystem {
      */
     public AdmissionContainer createPlannedVisitEncounter(PatientCreationParameters patParams,
 											AdmissionParameters admParams, 
-											IdDt hospitalID, // TODO: Use this one
+											IdDt hospitalId,
 											PatientCreation patientCreation)
     {
-    	AdmissionContainer admission = new AdmissionContainer();
+    	// Due to mutual dependencies some resources must first be created 
+    	// locally before uploading:
     	
-	    // GET OR CREATE PATIENT
+	    // Get or create patient
 	    Patient patient = patientCreation.providePatient(patParams);
 	
-		// CREATE INDICATION
+		// Create and upload indication
 		Condition condition = new MyCondition(client, patient, admParams).getCondObj();
 		   	
-		// CREATE VISIT ENCOUNTER	
-		Date date = java.util.Calendar.getInstance().getTime();
-	    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-	    String dateString = dateFormatter.format(date);
-		    
-		Encounter visit = new Encounter();
-		// big encounter to record the whole visit of the patient
-		visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000));
-		visit.setStatus(EncounterStateEnum.PLANNED);
-		visit.setClassElement(admParams.admissionClass);
-		visit.setSubject(new ResourceReferenceDt(patient.getId()));
-		visit.addParticipant().setIndividual(new ResourceReferenceDt(admParams.doctorID));	
-		visit.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));
-		visit.setIndication(new ResourceReferenceDt(condition.getId()));
+		// Create hospitalization
+		Hospitalization hosp = createLocalHospitalization(admParams);
 		
-		// CREATE HOSPITALIZATION
+		// Create visit encounter	
+		Encounter visit = createLocalVisitEncounter(admParams, patient, hospitalId);
+		visit.setIndication(new ResourceReferenceDt(condition.getId()));
+		visit.setHospitalization(hosp);
+		
+	    // Upload visit encounter    
+		IdDt visitId = createEncounter(client, visit);		
+		
+		// Update Condition with visit encounter id    
+	    condition.setEncounter(new ResourceReferenceDt(visitId));	    
+	    MyCondition.updateCondition(client, condition);
+	    
+	    // Fill and return admission container
+    	AdmissionContainer admissionResult = new AdmissionContainer();
+    	 
+	    admissionResult.visit = visit;
+	    admissionResult.patient = patient;
+	    admissionResult.hospitalization = visit.getHospitalization();
+	    admissionResult.condition = condition;		
+	    
+	    return admissionResult;	    
+    }
+    
+    /**
+     *  Create a hospitalization without uploading it
+     * @param admParams
+     * @return
+     */
+    private Hospitalization createLocalHospitalization(AdmissionParameters admParams)
+    {
 		Hospitalization hosp = new Hospitalization();
 		  
 		hosp.addAccomodation().setBed(new ResourceReferenceDt(admParams.station));
 		hosp.setReAdmission(false); // accepts boolean and sets it true, if the patient was admitted one more time
 	    
-		visit.setHospitalization(hosp);
-		
-	    // Upload visit    
-		IdDt visitId = createEncounter(client, visit);		
-		
-	    condition.setEncounter(new ResourceReferenceDt(visit.getId()));
-	
-	    // Update Condition with visit encounter id    
-	    MyCondition.updateCondition(client, condition);
-	    
-	    // filling container class
-	    //admission.adm = adm.getAdmObj();
-	    admission.visit = visit;
-	    admission.patient = patient;
-	    admission.hospitalization = visit.getHospitalization();
-	    admission.condition = condition;
-		
-	    
-	    /* Formerly for already existing patients
-	    System.out.println("###### 3.2. Ja. Die Patienten-ID wird abgerufen...");
-	    boolean reAdmission = true;
-	    IdDt patId = results.getEntries().get(0).getId();
-	    Patient readmissionedPatient = getPatientFromID(client, patId);
-	    System.out.println("PatID: "+patId);
-	
-	    Condition indication = new MyCondition(client, readmissionedPatient, admParams.doctorID, admParams.diagnosisICD, admParams.diagnosisDescription).getCondObj();
-	    System.out.println("###### admission loaded");
-	    MyAdmission adm = new MyAdmission(client, readmissionedPatient, admParams.admissionClass, indication.getId(),admParams.doctorID, admParams.station, hospitalID, reAdmission);
-	    indication.setEncounter(new ResourceReferenceDt(adm.getAdmObj().getId()));
-	    MyCondition.updateCondition(client, indication);
-	    
-	    // filling container class
-	    admission.adm = adm.getAdmObj();
-	    admission.visit = adm.getVisitObj();
-	    admission.patient = readmissionedPatient;
-	//	admission.patientID = patId;
-	    admission.hospitalization = adm.getHospitalization();
-	    admission.condition = indication;
-	    */
-		
-	    return admission;	    
+		return hosp;
     }
     
+    /**
+     * Create a visit encounter without uploading it.
+     * The visit encounter is the 'big' encounter with many adm sub-encounters
+     * for the individual treatments.
+     * @return
+     */
+    private Encounter createLocalVisitEncounter(AdmissionParameters admParams, 
+    											Patient patient,
+    											IdDt hospitalId)
+    {		    
+		Encounter visit = new Encounter();
+		
+		// big encounter to record the whole visit of the patient
+		visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000));
+		visit.setStatus(EncounterStateEnum.PLANNED);
+		visit.setClassElement(admParams.admissionClass);
+		
+		visit.setSubject(new ResourceReferenceDt(patient.getId()));
+		visit.addParticipant().setIndividual(new ResourceReferenceDt(admParams.doctorID));	
+		visit.setServiceProvider(new ResourceReferenceDt(hospitalId));
+
+		Date date = java.util.Calendar.getInstance().getTime();
+	    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	    String dateString = dateFormatter.format(date);
+		
+		visit.setPeriod(new PeriodDt().setStart(new DateTimeDt(dateString)));		
+		
+		
+		return visit;
+    }
     
     /**
-     * 	Add first adm encounter to input admission container 
-     */   
+     * Create the first adm encounter for a planned visit encounter.
+     * The visit encounter is set from 'planned' to 'in-progress'.
+     * Any further admissions should be added by transferring
+     * @param admission
+     * @param admParams
+     * @param duration
+     * @param targetOrganizationReference
+     */
     public void addAdmissionEncounter(AdmissionContainer admission,
     								AdmissionParameters admParams,
     								long duration,
@@ -162,7 +168,7 @@ public class AdmissionSystem {
 		beginningEncounter.setClassElement(admParams.admissionClass);
 		beginningEncounter.setLength(encounterDuration);
 
-		beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(admParams.diagnosisICD));
+		//beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(admParams.diagnosisICD));
 		beginningEncounter.setSubject(admission.visit.getSubject());
 
 		ResourceReferenceDt visitReference = new ResourceReferenceDt(admission.visit);
@@ -174,12 +180,20 @@ public class AdmissionSystem {
 		beginningEncounter.setHospitalization(beginningHospitalization);
 		
 		// Create new encounter on server		
-		IdDt admId = createEncounter(client, beginningEncounter);
-		
+		createEncounter(client, beginningEncounter);		
 		
 		admission.adm = beginningEncounter;
     }
     
+    
+    
+    /**
+     * Call the upload to the server and store the resulting id
+     * for later deletion
+     * @param client
+     * @param encounter
+     * @return
+     */
     public IdDt createEncounter(IGenericClient client, Encounter encounter)
     {
     	IdDt encounterId = uploadEncounter(client, encounter);
@@ -189,6 +203,12 @@ public class AdmissionSystem {
     	return encounterId;
     }
     
+    /**
+     * Upload an encounter to the server, returning the id
+     * @param client
+     * @param encounter
+     * @return
+     */
     private IdDt uploadEncounter(IGenericClient client, Encounter encounter)
     {
 		MethodOutcome  outcome = client
@@ -198,17 +218,23 @@ public class AdmissionSystem {
 				.encodedXml()
 				.execute();
 		
-        IdDt id = outcome.getId();
+		IdDt id = outcome.getId();        
         String elementSpecificId = id.getBaseUrl();
         String idPart = id.getIdPart();
         IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
-        
+
         // Set ID on local encounter object
         encounter.setId(idNonVersioned);         
         
         return idNonVersioned;
     }   
     
+    /**
+     * Update an encounter on the server
+     * @param client
+     * @param encounter
+     * @return
+     */
     public boolean updateEncounter(IGenericClient client, Encounter encounter)
     {
     	try {
@@ -224,6 +250,9 @@ public class AdmissionSystem {
 		}    	
     }
  
+    /**
+     * Remove all encounters known by id from the server
+     */
     public void removeAllEncounters()
     {
     	for(IdDt encounterID : encounterIds)
