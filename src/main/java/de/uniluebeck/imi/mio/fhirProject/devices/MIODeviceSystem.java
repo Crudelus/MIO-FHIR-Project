@@ -3,6 +3,7 @@
  */
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,15 +51,25 @@ public class MIODeviceSystem implements IDevice {
 		 * Create Tokometer; add attributes
 		 */
 		Device tokometer = new Device();
-		tokometer.setUdi("toko1");
+		tokometer.setUdi("toko-001");
 		tokometer.setManufacturer("Draeger");
 		tokometer.setModel("TokoMaster 5000");
 		tokometer.setOwner(new ResourceReferenceDt(patSys.getBirthStation()));
-
+		
 		/*
-		 * Create Tokometer on Server
+		 * Create
+		 */
+		Device herbert = new Device();
+		herbert.setUdi("smm-012");
+		herbert.setManufacturer("Herbert Medical Group");
+		herbert.setModel("Sphygmomanometer H-1337");
+		herbert.setOwner(new ResourceReferenceDt(patSys.getIMC()));
+			
+		/*
+		 * Create Devices on Server
 		 */
 		MethodOutcome m = communicator.createRessourceOnServer(tokometer);
+		communicator.createRessourceOnServer(herbert);
 		IdDt tokoID = m.getId();
 
 		/*
@@ -120,6 +131,7 @@ public class MIODeviceSystem implements IDevice {
 		return communicator.updateDevice(dev);
 	}
 
+	@Override
 	public void delAll() {
 		communicator.deleteAll();
 	}
@@ -130,19 +142,13 @@ public class MIODeviceSystem implements IDevice {
 		return true;
 	}
 
-	/**
-	 * @param devId
-	 * @return ResourceReferenceDt for the Location
-	 */
+	@Override
 	public ResourceReferenceDt getDeviceLocation(IdDt devId) {
 		Device dev = communicator.getDevice(devId);
 		return dev.getLocation();
 	}
 
-	/**
-	 * @param patId
-	 * @return
-	 */
+	@Override
 	public ArrayList<DeviceObservationReport> getDeviceObservationReportsForPatient(
 			IdDt patId) {
 
@@ -168,12 +174,9 @@ public class MIODeviceSystem implements IDevice {
 		return devicesForPat;
 	}
 
-	/**
-	 * @return all devices of the hospital
-	 */
+	@Override
 	public List<Device> getHospitalDevices() {
 		List<Device> devices = communicator.getAllDevices();
-
 		return devices;
 	}
 	
