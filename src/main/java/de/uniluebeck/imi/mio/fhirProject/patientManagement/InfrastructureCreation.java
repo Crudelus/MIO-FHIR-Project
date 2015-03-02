@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Composition;
-
+import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
@@ -487,8 +486,33 @@ public class InfrastructureCreation {
 
 		organization.setLocation(organizationLocationsList);
 		
+		updateOrganization(client, organization);
+		
+		
 		return result_id;
 	}
+	
+	
+	/**
+     * Update an organization on the server
+     * @param client
+     * @param organization
+     * @return
+     */
+    public boolean updateOrganization(IGenericClient client, Organization organization)
+    {
+    	try {
+			client
+			.update()
+			.resource(organization)
+			.execute();
+			return true;
+		} catch (Exception e) {
+			System.err.println("Organization update failed");
+			e.printStackTrace();
+			return false;
+		}    	
+    }
 	
 	/**
 	 * This method instantiates an AdressDt-object with the given parameters
