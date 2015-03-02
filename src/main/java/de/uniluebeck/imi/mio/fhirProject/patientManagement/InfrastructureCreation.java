@@ -122,12 +122,15 @@ public class InfrastructureCreation {
 		receptionRoomLocation.setId(uploadLocation(client, receptionRoomLocation));
 				
 		createLocation(hospitalLocation, client, hospitalAddress, hospital, receptionRoomLocation);
-				
+		
 		
 		//hospital.setId(uploadOrganization(client, hospital));
 		hospitalID = uploadOrganization(client, hospital);
 		hospital.setId(hospitalID);
 				
+		// Update hospital to reference its location on the server
+		updateOrganization(client, hospital);
+		
 		
 		/*
 		 *  Create birth station (BS)
@@ -156,6 +159,8 @@ public class InfrastructureCreation {
 		
 		createLocation(birthStationLocation, client, birthStationAddress, birthStation, birthStationRoomLocation);
 		
+		// Update birth station to reference its location on the server
+		updateOrganization(client, birthStation);
 		
 
 
@@ -184,9 +189,10 @@ public class InfrastructureCreation {
 		
 		
 		createLocation(nicuLocation, client, nicuAddress, nicuStation, nicuRoomLocation);
-		
-		
-		
+				
+		// Update nicu station to reference its location on the server
+		updateOrganization(client, nicuStation);
+				
 		
 		
 		
@@ -214,7 +220,9 @@ public class InfrastructureCreation {
 		
 		createLocation(icuLocation, client, icuAddress, icuStation, icuRoomLocation);
 		
-		
+		// Update icu station to reference its location on the server
+		updateOrganization(client, icuStation);
+				
 		
 		
 		
@@ -244,7 +252,9 @@ public class InfrastructureCreation {
 		
 		createLocation(imcLocation, client, imcAddress, imcStation, imcRoomLocation);
 		
-		
+		// Update imc station to reference its location on the server
+		updateOrganization(client, imcStation);
+				
 		/*
 		 *  Create Laboratory (LAB)
 		 */
@@ -268,7 +278,9 @@ public class InfrastructureCreation {
 		Location labLocation= new Location();
 		createLocation(labLocation, client, labAddress, laboratoryStation, labRoomLocation);
 		
-		
+		// Update laboratory station to reference its location on the server
+		updateOrganization(client, laboratoryStation);
+				
 		
 	
 		
@@ -485,9 +497,6 @@ public class InfrastructureCreation {
 		organizationLocation.setId(result_id);
 
 		organization.setLocation(organizationLocationsList);
-		
-		updateOrganization(client, organization);
-		
 		
 		return result_id;
 	}
