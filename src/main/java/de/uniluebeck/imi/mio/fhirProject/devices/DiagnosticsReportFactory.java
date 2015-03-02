@@ -54,7 +54,7 @@ public class DiagnosticsReportFactory {
 		leuko.setSystem("http://unitsofmeasure.org");
 		leuko.setUnits("x10*9/L");
 		leuko.setCode("x10*9/L");
-		leuko.setValue(4.6);
+		leuko.setValue((int) (Math.random() * (10 - 3) + 3));
 
 		Observation obvLeu = new Observation();
 		obvLeu.setName(new CodeableConceptDt("http://loinc.org", "6690-2")
@@ -69,7 +69,7 @@ public class DiagnosticsReportFactory {
 		hemo.setSystem("http://unitsofmeasure.org");
 		hemo.setUnits("g/L");
 		hemo.setCode("g/L");
-		hemo.setValue(176);
+		hemo.setValue((int) (Math.random() * (190 - 90) + 90));
 
 		Observation obvHem = new Observation();
 		obvHem.setName(new CodeableConceptDt("http://loinc.org", "718-7")
@@ -109,7 +109,7 @@ public class DiagnosticsReportFactory {
 			bpm.setSystem("http://unitsofmeasure.org");
 			bpm.setUnits("{Beats}/min");
 			bpm.setCode("{Beats}/min");
-			bpm.setValue(140);
+			bpm.setValue((int) (Math.random() * (200 - 100) + 100));
 
 			Observation obvBpm = new Observation();
 			List<ResourceReferenceDt> perf = new ArrayList<ResourceReferenceDt>();
@@ -144,7 +144,7 @@ public class DiagnosticsReportFactory {
 			pres.setSystem("http://unitsofmeasure.org");
 			pres.setUnits("mm[Hg]");
 			pres.setCode("mm[Hg]");
-			pres.setValue(120);
+			pres.setValue((int) (Math.random() * (140 - 80) + 80));
 
 			Observation obvPres = new Observation();
 			obvPres.setName(new CodeableConceptDt("http://loinc.org", "55284-4")
