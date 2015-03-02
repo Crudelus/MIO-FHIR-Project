@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
@@ -52,18 +53,22 @@ public class MIODeviceSystem implements IDevice {
 		 */
 		Device tokometer = new Device();
 		tokometer.setUdi("toko-001");
+		tokometer.setType(new CodeableConceptDt("MIO-KH-HH", "Tokometer"));
 		tokometer.setManufacturer("Draeger");
 		tokometer.setModel("TokoMaster 5000");
 		tokometer.setOwner(new ResourceReferenceDt(patSys.getBirthStation()));
+		tokometer.setLocation(patSys.getNICU().getLocation().get(0));
 		
 		/*
 		 * Create
 		 */
 		Device herbert = new Device();
 		herbert.setUdi("smm-012");
+		herbert.setType(new CodeableConceptDt("MIO-KH-HH", "Sphygmomanometer"));
 		herbert.setManufacturer("Herbert Medical Group");
 		herbert.setModel("Sphygmomanometer H-1337");
 		herbert.setOwner(new ResourceReferenceDt(patSys.getIMC()));
+		herbert.setLocation(patSys.getIMC().getLocation().get(0));
 			
 		/*
 		 * Create Devices on Server
