@@ -30,7 +30,7 @@ public class InfrastructureCreation {
 	
 	private IdDt imcID;
 	private IdDt birthStationID;
-	
+	private IdDt nicuStationID;
 	
 	public InfrastructureCreation(IGenericClient inClient)
 	{
@@ -65,6 +65,11 @@ public class InfrastructureCreation {
 	public Organization getIMC()
 	{
 		return client.read(Organization.class, imcID);		
+	}
+	
+	public Organization getNICU()
+	{
+		return client.read(Organization.class, nicuStationID);		
 	}
 	
 	/**
@@ -160,7 +165,7 @@ public class InfrastructureCreation {
 		 */
 		Organization nicuStation = new Organization();
 		ResourceReferenceDt nicuStationResource = new ResourceReferenceDt();
-		createStation(nicuStation, hospitalResource, "Neonatal Intensive Care Unit", client, nicuStationResource);
+		nicuStationID = createStation(nicuStation, hospitalResource, "Neonatal Intensive Care Unit", client, nicuStationResource);
 
 		// Create NICU-location
 		AddressDt nicuAddress = createAddress("Musterstrasse 1, Abteilung 2", "Hamburg", "Hamburg", "22113", "Germany");

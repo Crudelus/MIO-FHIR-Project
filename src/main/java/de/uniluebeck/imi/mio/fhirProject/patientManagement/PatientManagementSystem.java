@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.DurationDt;
@@ -84,9 +85,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 							long duration) 
 	{    
 		admissionSystem.addAdmissionEncounter(admission, admParams, duration, targetOrganizationReference);
-			
-		// TODO: Note: Arztbrief is implemented (createComposition)
-				
+	
 		return admission;
 	}
 	
@@ -95,7 +94,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		
 		// Mark visit encounter as finished
 		admission.visit.setStatus(EncounterStateEnum.FINISHED);
-		admissionSystem.updateEncounter(client, admission.visit);				
+		boolean updateSucess = admissionSystem.updateEncounter(client, admission.visit);				
 		
 		Encounter dischargeEncounter = new Encounter();
 		
@@ -104,9 +103,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 								dischargeEncounter, 
 								admission.hospitalization, 
 								true);
-		
-		// TODO Fix return value
-		return true;
+
+		return updateSucess;
 	}
 	
 	/**
@@ -212,6 +210,10 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		return infrastructure.getIMC(); 
 	}
 	
+	@Override
+	public Organization getNICU() {		
+		return infrastructure.getNICU(); 
+	}
 
 	@Override
 	public List<Practitioner> getNurseList() {
@@ -270,6 +272,36 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		admissionContainer.composition = composition;
 		
 		compositionIds.add(compositionId);
+	}
+	
+	/**
+	 * Get all known encounters for a given patient
+	 * @param patient
+	 * @return
+	 */
+	@Override
+	public List<Encounter> getAllPatientEncounters(Patient patient)
+	{
+		List<Encounter> resultEncounters = new ArrayList<Encounter>();
+		
+		// Get all encounters with the patient as subject
+		Bundle bundle = client.
+				search().
+				forResource(Encounter.class)
+				.where(Encounter.SUBJECT.hasId(patient.getId()))
+				.execute();
+		
+		resultEncounters.addAll(bundle.getResources(Encounter.class));
+
+		while (!bundle.getLinkNext().isEmpty()) {
+			bundle = client
+					.loadPage()
+					.next(bundle)
+					.execute();
+			resultEncounters.addAll(bundle.getResources(Encounter.class));
+		}
+		
+		return resultEncounters;
 	}
 	
 	
