@@ -71,7 +71,7 @@ public interface IDevice {
 	 * @param deviceId
 	 * @return IdDt of the created DeviceObservationReport
 	 */
-	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId);
+	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId, IdDt performer);
 	
 	/**
 	 * Deletes ALL Entities created from MIODevSys

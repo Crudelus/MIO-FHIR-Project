@@ -5,9 +5,11 @@ import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
 import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport.VirtualDeviceChannelMetric;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -86,59 +88,89 @@ public class DiagnosticsReportFactory {
 		return outLab.getId();
 	}
 
-	public IdDt newDeviceObservationReport(IdDt deviceId, IdDt diagOrderId, IdDt patId) {
-
+	public IdDt newDeviceObservationReport(IdDt deviceId, IdDt diagOrderId, IdDt patId, IdDt performer) {
+		
+		
 		DeviceObservationReport vitPar = new DeviceObservationReport();
 		vitPar.setSubject(new ResourceReferenceDt(patId));
 		vitPar.setSource(new ResourceReferenceDt(deviceId));
-
-		// temperature
-		QuantityDt temp = new QuantityDt();
-		temp.setSystem("http://unitsofmeasure.org");
-		temp.setUnits("cel(1 K) ");
-		temp.setCode("cel(1 K) ");
-		temp.setValue(37.3);
-
-		Observation obvTemp = new Observation();
-		obvTemp.setName(new CodeableConceptDt("http://loinc.org", "8310-5")
-				.setText("Body temperature [degrees Celcius]"));
-
-		obvTemp.setStatus(ObservationStatusEnum.FINAL);
-		obvTemp.setReliability(ObservationReliabilityEnum.OK);
-		obvTemp.setValue(temp);
-
-		// blood pressure
-		QuantityDt pres = new QuantityDt();
-		pres.setSystem("http://unitsofmeasure.org");
-		pres.setUnits("mm[Hg]");
-		pres.setCode("mm[Hg]");
-		pres.setValue(120);
-
-		Observation obvPres = new Observation();
-		obvPres.setName(new CodeableConceptDt("http://loinc.org", "55284-4")
-				.setText("Blood pressure [mass/mercury]"));
-
-		obvPres.setStatus(ObservationStatusEnum.FINAL);
-		obvPres.setReliability(ObservationReliabilityEnum.OK);
-		obvPres.setValue(pres);
-
-		MethodOutcome outPres = communicator.createRessourceOnServer(obvPres);
-		MethodOutcome outTemp = communicator.createRessourceOnServer(obvTemp);
 		
-		VirtualDeviceChannelMetric pressure = new VirtualDeviceChannelMetric();
-		VirtualDeviceChannelMetric temperature = new VirtualDeviceChannelMetric();
+		Device dev = communicator.getDevice(deviceId);
+		CodeableConceptDt devType = dev.getType();
+		String devCode = devType.getCodingFirstRep().getValueAsQueryToken();
 		
-		pressure.setObservation(new ResourceReferenceDt(outPres.getId()));
-		temperature.setObservation(new ResourceReferenceDt(outTemp.getId()));
 		
-		ArrayList<VirtualDeviceChannelMetric> metric = new ArrayList<VirtualDeviceChannelMetric>();
-		metric.add(temperature);
-		metric.add(pressure);
 		
-		vitPar.addVirtualDevice().addChannel().setMetric(metric);
+		switch(devCode){
+		case "Tokometer":
+			
+			// fetal heart rate
+			QuantityDt bpm = new QuantityDt();
+			bpm.setSystem("http://unitsofmeasure.org");
+			bpm.setUnits("{Beats}/min");
+			bpm.setCode("{Beats}/min");
+			bpm.setValue(140);
 
-		MethodOutcome outDev = communicator.createRessourceOnServer(vitPar);
+			Observation obvBpm = new Observation();
+			List<ResourceReferenceDt> perf = new ArrayList<ResourceReferenceDt>();
+			perf.add(0, new ResourceReferenceDt(performer));
+			obvBpm.setPerformer(perf);
+			obvBpm.setName(new CodeableConceptDt("http://loinc.org", "8867-4")
+					.setText("Fetal Heart Rate [Beats per minute]"));
 
-		return outDev.getId();
+			obvBpm.setStatus(ObservationStatusEnum.FINAL);
+			obvBpm.setReliability(ObservationReliabilityEnum.OK);
+			obvBpm.setValue(bpm);
+
+			MethodOutcome outBpm = communicator.createRessourceOnServer(obvBpm);
+			
+			VirtualDeviceChannelMetric heartRate = new VirtualDeviceChannelMetric();
+			
+			heartRate.setObservation(new ResourceReferenceDt(outBpm.getId()));
+			
+			ArrayList<VirtualDeviceChannelMetric> metric = new ArrayList<VirtualDeviceChannelMetric>();
+			metric.add(heartRate);
+			
+			vitPar.addVirtualDevice().addChannel().setMetric(metric);
+
+			MethodOutcome outDev1 = communicator.createRessourceOnServer(vitPar);
+			 
+			return outDev1.getId();
+			
+		default:
+			
+			// blood pressure
+			QuantityDt pres = new QuantityDt();
+			pres.setSystem("http://unitsofmeasure.org");
+			pres.setUnits("mm[Hg]");
+			pres.setCode("mm[Hg]");
+			pres.setValue(120);
+
+			Observation obvPres = new Observation();
+			obvPres.setName(new CodeableConceptDt("http://loinc.org", "55284-4")
+					.setText("Blood pressure [mass/mercury]"));
+
+			obvPres.setStatus(ObservationStatusEnum.FINAL);
+			obvPres.setReliability(ObservationReliabilityEnum.OK);
+			obvPres.setValue(pres);
+
+			MethodOutcome outPres = communicator.createRessourceOnServer(obvPres);
+			
+			VirtualDeviceChannelMetric pressure = new VirtualDeviceChannelMetric();
+			
+			pressure.setObservation(new ResourceReferenceDt(outPres.getId()));
+			
+			ArrayList<VirtualDeviceChannelMetric> metric1 = new ArrayList<VirtualDeviceChannelMetric>();
+			metric1.add(pressure);
+			
+			vitPar.addVirtualDevice().addChannel().setMetric(metric1);
+
+			MethodOutcome outDev2 = communicator.createRessourceOnServer(vitPar);
+			
+			return outDev2.getId();
+
+		}
+		
+		
 	}
 }

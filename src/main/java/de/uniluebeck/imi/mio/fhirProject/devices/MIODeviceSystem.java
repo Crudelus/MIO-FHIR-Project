@@ -192,8 +192,8 @@ public class MIODeviceSystem implements IDevice {
 	}
 	
 	@Override
-	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId){
-		IdDt devRep = dFactory.newDeviceObservationReport(deviceId, diagnosticOrderId, patId);
+	public IdDt newDeviceObservationReport(IdDt diagnosticOrderId, IdDt patId, IdDt deviceId, IdDt performer){
+		IdDt devRep = dFactory.newDeviceObservationReport(deviceId, diagnosticOrderId, patId,performer);
 		return devRep;
 	}
 	
