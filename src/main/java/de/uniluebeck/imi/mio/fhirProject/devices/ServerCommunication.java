@@ -100,6 +100,8 @@ public class ServerCommunication {
 				.forResource(DeviceObservationReport.class)
 				.where(DeviceObservationReport.SUBJECT.hasId(patId)).execute();
 
+		obsForPat.addAll(bundle.getResources(DeviceObservationReport.class));
+		
 		while (!bundle.getLinkNext().isEmpty()) {
 			bundle = client.loadPage().next(bundle).execute();
 			obsForPat

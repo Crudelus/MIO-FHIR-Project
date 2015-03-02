@@ -1,6 +1,7 @@
 package de.uniluebeck.imi.mio.fhirProject.devices;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -94,6 +95,7 @@ public class DiagnosticsReportFactory {
 		DeviceObservationReport vitPar = new DeviceObservationReport();
 		vitPar.setSubject(new ResourceReferenceDt(patId));
 		vitPar.setSource(new ResourceReferenceDt(deviceId));
+		vitPar.setInstantWithMillisPrecision(new Date());
 		
 		Device dev = communicator.getDevice(deviceId);
 		CodeableConceptDt devType = dev.getType();
