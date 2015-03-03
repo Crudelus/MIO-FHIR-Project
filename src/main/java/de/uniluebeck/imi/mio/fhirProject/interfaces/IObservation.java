@@ -15,33 +15,39 @@ public interface IObservation {
 	/**
 	 * create an Admission
 	 */
-	public boolean createAdmission(EncounterClassEnum ECE, String diagnosisICD, String diagnosisDescription, IdDt doctorID,IdDt station,IdDt hospital,String firstName,String lastName,String maidenName,DateTimeDt birthDate,AdministrativeGenderCodesEnum gender,MaritalStatusCodesEnum maritalStatus,String line,String zip,String city);
+	//public boolean createAdmission(EncounterClassEnum ECE, String diagnosisICD, String diagnosisDescription, IdDt doctorID,IdDt station,IdDt hospital,String firstName,String lastName,String maidenName,DateTimeDt birthDate,AdministrativeGenderCodesEnum gender,MaritalStatusCodesEnum maritalStatus,String line,String zip,String city);
 
 	/**
 	 * discharge a Patient 
 	 */
-	public boolean dischargePatient(AdmissionContainer adCont);
+	//public boolean dischargePatient(AdmissionContainer adCont);
 	
 	/**
 	 * transfer of a patient 
 	 */
-	public boolean transferPatient(AdmissionContainer admission, 
-			ResourceReferenceDt targetOrganizationReference,
-			long duration,
-			String diagnosisICD,
-			String diagnosisDescription);
+	//public boolean transferPatient(AdmissionContainer admission, 
+			//ResourceReferenceDt targetOrganizationReference,
+			//long duration,
+			//String diagnosisICD,
+			//String diagnosisDescription);
 	
 	/**
 	 * create Birth
 	 */
-	public boolean createBirth();
+	//public boolean createBirth();
 	
 	/**
 	 * change Maritial Status 
 	 */
-	public boolean changeMaritialStatus(Patient patient, MaritalStatusCodesEnum mariage);
+	//public boolean changeMaritialStatus(Patient patient, MaritalStatusCodesEnum mariage);
 	
 	/**
-	 * 
+	 * Liefert Übersicht über die Stationen 
 	 */
+	public String[][] getStations();
+	
+	/**
+	 * liefert Übersicht über die eingewiesenden Patienten 
+	 */
+	public String[][] getPatients();
 }
