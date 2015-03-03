@@ -1,6 +1,6 @@
 package de.uniluebeck.imi.mio.fhirProject.Station;
 
-public enum StationKind 
+public enum EStationKind 
 {	
 	ICU, NICU, IWS
 }
