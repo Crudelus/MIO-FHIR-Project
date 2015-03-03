@@ -151,7 +151,7 @@ public class Observations implements IObservation {
 			}
 			
 			//p.getManagingOrganization().getResource().
-			p.PROVIDER.getParamName();
+			//p.PROVIDER.getParamName();
 			
 			
 			iterator=iterator+14;
