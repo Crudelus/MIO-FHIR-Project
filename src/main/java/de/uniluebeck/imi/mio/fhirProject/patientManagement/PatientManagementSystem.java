@@ -94,8 +94,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		
 		// Mark visit encounter as finished
 		admission.visit.setStatus(EncounterStateEnum.FINISHED);
-		boolean updateSucess = admissionSystem.updateEncounter(client, admission.visit);				
-		
+		boolean updateSucess = admissionSystem.updateEncounter(client, admission.visit);	
+
 		Encounter dischargeEncounter = new Encounter();
 		
 		executePatientTransfer(admission, 
@@ -146,6 +146,9 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		beginningEncounter.setStatus(EncounterStateEnum.IN_PROGRESS);
 		beginningEncounter.setClassElement(runningEncounter.getClassElement());
 		beginningEncounter.setLength(encounterDuration);
+		beginningEncounter.setSubject(new ResourceReferenceDt(admission.patient.getId()));
+		
+		
 
 		//beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(transferContainer.diagnosisICD));
 		
@@ -170,17 +173,22 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		boolean updateSuccess = admissionSystem.updateEncounter(client, admission.adm);		
 		
 		
-		beginningEncounter.setSubject(admission.visit.getSubject());
+		beginningEncounter.setSubject(new ResourceReferenceDt(admission.patient.getId()));
 		ResourceReferenceDt visitReference = new ResourceReferenceDt(admission.visit);
 		beginningEncounter.setPartOf(visitReference);
 		
 		if(discharge)
 		{
 			beginningHospitalization.setDischargeDisposition(new CodeableConceptDt("http://hl7.org/fhir/discharge-disposition", "home"));
+			beginningEncounter.setStatus(EncounterStateEnum.FINISHED);
+			beginningEncounter.addIdentifier("http://kh-hh.de/mio/encounters","Discharge-"+(int)(Math.random()*1000) + " - " + admission.patient.getNameFirstRep());
+
 		} 
 		else
 		{
 			beginningHospitalization.setDestination(targetOrganizationReference);
+			beginningEncounter.addIdentifier("http://kh-hh.de/mio/encounters","Transfer-"+(int)(Math.random()*1000) + " - " + admission.patient.getNameFirstRep());
+
 		}
 
 		beginningEncounter.setHospitalization(beginningHospitalization);
@@ -246,14 +254,15 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		Composition composition = new Composition();
 		
 		IdDt externalDoctorId = new IdDt();
+		
+		// Keep this hard-coded in order not to over-complicate things
 		externalDoctorId = doctorCreation.createDoctor("http://www.kh-hh.de/mio/practitioner", 
 							"123456", "Schroeder", "Gerhard", "Musterstrasse 2", "22113", 
 							"Hamburg", AdministrativeGenderCodesEnum.M);
 		
-		
 		composition.setTitle("Arztbrief");
 
-		// TODO: Unsure whether these are the correct codes!
+		// These are almost definitely the correct codes
 		composition.setClassElement(new CodeableConceptDt("http://loinc.org", "11495-9"))
 					.setTitle("Physical Therapy Initial Assessment Note At First Encounter");
 		composition.setType(new CodeableConceptDt("http://loinc.org", "34763-3"));
@@ -331,6 +340,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
             .resourceById(compositionID)
             .execute();     
         }       
+        
+        
 	}
 	
 
@@ -352,7 +363,7 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 		IdDt idNonVersioned = new IdDt(elementSpecificId + "/" + id.getResourceType() + "/" + idPart);
 
         // Set ID on local patient object
-		composition.setId(idNonVersioned);         
+		composition.setId(idNonVersioned);
 		
 		return idNonVersioned;		
 	}
