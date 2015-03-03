@@ -12,7 +12,7 @@ public class GetPatient
 	{
 		List<Patient> erg = App.pms.getPatientList();
 		
-		for(Patient pat: erg)
+		for(Patient pat : erg)
 		{
 			if(pat.getId().getValue().compareTo(patientID.getValue()) == 0)
 			{
@@ -22,4 +22,6 @@ public class GetPatient
 		
 		return null;
 	}
+	
+	
 }
