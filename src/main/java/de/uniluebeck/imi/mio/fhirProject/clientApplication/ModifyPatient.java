@@ -1,5 +1,6 @@
 package de.uniluebeck.imi.mio.fhirProject.clientApplication;
 
-public class ModifyPatient {
+public class ModifyPatient
+{
 
 }
