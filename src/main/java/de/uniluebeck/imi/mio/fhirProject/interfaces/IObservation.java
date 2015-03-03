@@ -44,7 +44,7 @@ public interface IObservation {
 	/**
 	 * Liefert Übersicht über die Stationen 
 	 */
-	public String[][] getStations();
+	public String[][] getStations( );
 	
 	/**
 	 * liefert Übersicht über die eingewiesenden Patienten 
