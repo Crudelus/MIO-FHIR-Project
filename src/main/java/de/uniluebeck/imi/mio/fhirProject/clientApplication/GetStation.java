@@ -8,6 +8,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import de.uniluebeck.imi.mio.fhirProject.App;
 import de.uniluebeck.imi.mio.fhirProject.Station.Station;
 
+/**
+ * 
+ * @author Loki
+ *
+ */
 public class GetStation
 {
 	/**

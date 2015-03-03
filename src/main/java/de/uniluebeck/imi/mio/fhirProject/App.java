@@ -18,15 +18,14 @@ import de.uniluebeck.imi.mio.fhirProject.report.DeviceCommunicationSystem;
 public class App 
 {
 	public static final FhirContext ctx = new FhirContext();
+	public static final String serverBase = "http://fhirtest.uhn.ca/base";
 	public static final CReportManagmentSystem rms = new CReportManagmentSystem();
 	public static final DeviceCommunicationSystem dcs = new DeviceCommunicationSystem();
-	public static final PatientManagementSystem pms = new PatientManagementSystem(ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base"));
+	public static final PatientManagementSystem pms = new PatientManagementSystem(ctx.newRestfulGenericClient(serverBase));
+	
 	
     public static void main( String[] args )
     {
-    	String serverBase = "http://fhirtest.uhn.ca/base";
-
-	    // Server infrastructure:
 	    IGenericClient client = ctx.newRestfulGenericClient(serverBase);
     }
     
