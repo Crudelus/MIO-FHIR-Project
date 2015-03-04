@@ -1,5 +1,7 @@
 package de.uniluebeck.imi.mio.fhirProject.interfaces;
 
+import java.util.Vector;
+
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Claim.Patient;
@@ -44,10 +46,10 @@ public interface IObservation {
 	/**
 	 * Liefert Übersicht über die Stationen 
 	 */
-	public String[][] getStations( );
+	public Vector<String> getStations( );
 	
 	/**
 	 * liefert Übersicht über die eingewiesenden Patienten 
 	 */
-	public String[][] getPatients();
+	public Vector<String> getPatients();
 }

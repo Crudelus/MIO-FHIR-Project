@@ -2,6 +2,7 @@
 package de.uniluebeck.imi.mio.fhirProject.observation;
 
 import java.util.List;
+import java.util.Vector;
 
 import de.uniluebeck.imi.mio.fhirProject.App;
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionParameters;
@@ -104,64 +105,87 @@ public class Observations implements IObservation {
 	}
 	*/
 	
-	public String[][] getPatients(){
-		Bundle results = client.search().forResource(Patient.class).execute();
-		List<Patient> list = results.getResources(Patient.class);
+	public Vector<String> getPatients()
+	{
 		
-		int size = list.size();
-		String[][] PatArr = new String[size*14][2];
-		
-		int iterator = 0;
-		
-		for (Patient p : list) {
-			
-			
-			for (HumanNameDt name : p.getName()) {
+		List<Patient> list = App.pms.getPatientList();
+		Vector<String> vec = new Vector<String>();
+		for(Patient p : list)
+		{
+			for(HumanNameDt name : p.getName())
+			{
+				if(!name.getPrefixAsSingleString().equals(null))
+				{
+					vec.add(name.getPrefixAsSingleString());
+				}
+				else
+				{
+					vec.add("");
+				}
 				
-				PatArr[iterator][1] = name.getPrefixAsSingleString();
-				PatArr[iterator][0] = "Titel";
-								
-				PatArr[iterator+1][1] = name.getFamilyAsSingleString();
-				PatArr[iterator+1][0] = "Nachname";
+				if(!name.getFamilyAsSingleString().equals(null))
+				{
+					vec.add(name.getFamilyAsSingleString());
+				}else
+				{
+					vec.add("");
+				}
 				
-				PatArr[iterator+2][1] = name.getGivenAsSingleString();	
-				PatArr[iterator+2][0] = "Vorname";
-				
-				PatArr[iterator+3][1] = "";	
-				PatArr[iterator+3][0] = "Geburtsname";
-				
-				PatArr[iterator+4][1] = name.getSuffixAsSingleString();
-				PatArr[iterator+4][0] = "Zusatz";
+				if(!name.getGivenAsSingleString().equals(null))
+				{
+					vec.add(name.getGivenAsSingleString());
+				}else
+				{
+					vec.add("");
+				}
 			}
 			
-			DateTimeDt date = p.getBirthDate();
-			date.getValueAsString();
-			
-			PatArr[iterator+5][1] = date.getValueAsString();
-			PatArr[iterator+5][0] = "Geburtsdatum";
-			
-			for(AddressDt address : p.getAddress() ){
-				//String street = address.getLine().get(0).getValueAsString();
-				String street = address.getLineFirstRep().getValueAsString();
-				String postalCode = address.getZip().getValueAsString();
-				String city = address.getCity().getValueAsString();
-				
-				PatArr[iterator+6][1] = street+postalCode+city;
-				PatArr[iterator+6][0] = "Adresse";
-			}
-			
-			//p.getManagingOrganization().getResource().
-			//p.PROVIDER.getParamName();
-			
-			
-			iterator=iterator+14;
+		    for(AddressDt adress : p.getAddress())
+		    {
+		    	if(!adress.getCountry().getValue().equals(null))
+		    	{
+		    		vec.add(adress.getCountry().getValueAsString());
+		    	}else
+		    	{
+		    		vec.add("");
+		    	}
+		    	
+		    	if(!adress.getCity().getValue().equals(null))
+		    	{
+		    		vec.add(adress.getCity().getValueAsString());
+		    	}
+		    	else
+		    	{
+		    		vec.add("");
+		    	}
+		    	
+		    	if(!adress.getZip().getValue().equals(null))
+		    	{
+		    		vec.add(adress.getZip().getValueAsString());
+		    	}else
+		    	{
+		    		vec.add("");
+		    	}
+		    	
+		    	if(!adress.getLineFirstRep().getValueAsString().equals(null))
+		    	{
+		    		vec.add(adress.getLineFirstRep().getValueAsString());
+		    	}
+		    	else
+		    	{
+		    		vec.add("");
+		    	}
+		    }
+		    
+		    
 		}
 		
-		return PatArr ; 
+		return vec;
 	}
 	
 	
-	public String[][] getStations(){
+	public Vector<String> getStations()
+	{
 		
 		return null;
 	}
