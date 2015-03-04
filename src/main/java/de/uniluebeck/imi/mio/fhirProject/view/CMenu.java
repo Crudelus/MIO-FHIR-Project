@@ -95,11 +95,12 @@ public class CMenu extends JMenu
 	{
 		//Begin Encounter
 		
-		this.menu_Encounter_createEncounter.addActionListener(new ActionListener() {
+		this.menu_Encounter_createEncounter.addActionListener(new ActionListener()
+		{
 			
 			public void actionPerformed(ActionEvent e) 
 			{
-				// TODO Auto-generated method stub
+				
 				
 			}
 		});

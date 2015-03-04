@@ -105,83 +105,46 @@ public class Observations implements IObservation {
 	}
 	*/
 	
-	public Vector<String> getPatients()
-	{
-		
-		List<Patient> list = App.pms.getPatientList();
-		Vector<String> vec = new Vector<String>();
-		for(Patient p : list)
-		{
-			for(HumanNameDt name : p.getName())
-			{
-				if(!name.getPrefixAsSingleString().equals(null))
-				{
-					vec.add(name.getPrefixAsSingleString());
-				}
-				else
-				{
-					vec.add("");
-				}
-				
-				if(!name.getFamilyAsSingleString().equals(null))
-				{
-					vec.add(name.getFamilyAsSingleString());
-				}else
-				{
-					vec.add("");
-				}
-				
-				if(!name.getGivenAsSingleString().equals(null))
-				{
-					vec.add(name.getGivenAsSingleString());
-				}else
-				{
-					vec.add("");
-				}
-			}
-			
-		    for(AddressDt adress : p.getAddress())
-		    {
-		    	if(!adress.getCountry().getValue().equals(null))
-		    	{
-		    		vec.add(adress.getCountry().getValueAsString());
-		    	}else
-		    	{
-		    		vec.add("");
-		    	}
-		    	
-		    	if(!adress.getCity().getValue().equals(null))
-		    	{
-		    		vec.add(adress.getCity().getValueAsString());
-		    	}
-		    	else
-		    	{
-		    		vec.add("");
-		    	}
-		    	
-		    	if(!adress.getZip().getValue().equals(null))
-		    	{
-		    		vec.add(adress.getZip().getValueAsString());
-		    	}else
-		    	{
-		    		vec.add("");
-		    	}
-		    	
-		    	if(!adress.getLineFirstRep().getValueAsString().equals(null))
-		    	{
-		    		vec.add(adress.getLineFirstRep().getValueAsString());
-		    	}
-		    	else
-		    	{
-		    		vec.add("");
-		    	}
-		    }
-		    
-		    
-		}
-		
-		return vec;
-	}
+	 public Vector<String> getPatients() { 
+		 Bundle results = client.search().forResource(Patient.class).execute();
+		 List<Patient> list = results.getResources(Patient.class);
+		 Vector<String> vec = new Vector<String>();
+		 for(Patient p : list)
+		 {
+			 for(HumanNameDt name : p.getName())
+			 {
+				 if(!(name.getPrefixAsSingleString() == null)) 
+				 { 
+					 vec.add(name.getPrefixAsSingleString());
+				 } 
+				 else
+				 { 
+					 vec.add("");
+				 } 
+				 
+				 if(!(name.getFamilyAsSingleString()==null))
+				 { 
+					 vec.add(name.getFamilyAsSingleString()); 
+				 }
+				 else
+				 { 
+					 vec.add("");
+				 }
+				 
+				 if(!(name.getGivenAsSingleString()==null))
+				 {
+					 vec.add(name.getGivenAsSingleString()); 
+			     }
+				 else
+			     {
+					 vec.add("");
+				 }
+			 } 
+			 
+			 for(AddressDt adress : p.getAddress()) { System.out.println(adress.getCountry().getValueAsString() == null); if(! (adress.getCountry().getValue() == null)) { vec.add(adress.getCountry().getValueAsString()); }else { vec.add(""); } if(!(adress.getCity().getValue()==null)) { vec.add(adress.getCity().getValueAsString()); } else { vec.add(""); } if(!(adress.getZip().getValue()==null)) { vec.add(adress.getZip().getValueAsString()); }else { vec.add(""); } if(!(adress.getLineFirstRep().getValueAsString()==null)) { vec.add(adress.getLineFirstRep().getValueAsString()); } else { vec.add(""); } } }
+		 
+		 
+		 return vec; }
 	
 	
 	public Vector<String> getStations()
