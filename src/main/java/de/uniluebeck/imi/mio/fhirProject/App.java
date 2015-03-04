@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import de.uniluebeck.imi.mio.fhirProject.devices.MIODeviceSystem;
+import de.uniluebeck.imi.mio.fhirProject.observation.Observations;
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientManagementSystem;
 import de.uniluebeck.imi.mio.fhirProject.report.CReportManagmentSystem;
 import de.uniluebeck.imi.mio.fhirProject.report.DeviceCommunicationSystem;
@@ -22,7 +23,7 @@ public class App
 	public static final CReportManagmentSystem rms = new CReportManagmentSystem();
 	public static final DeviceCommunicationSystem dcs = new DeviceCommunicationSystem();
 	public static final PatientManagementSystem pms = new PatientManagementSystem(ctx.newRestfulGenericClient(serverBase));
-	
+	public static final Observations obs = new Observations(pms);
 	
     public static void main( String[] args )
     {

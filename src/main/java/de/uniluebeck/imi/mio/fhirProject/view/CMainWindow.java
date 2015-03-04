@@ -1,11 +1,14 @@
 package de.uniluebeck.imi.mio.fhirProject.view;
 
 import java.awt.GridLayout;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+
+import de.uniluebeck.imi.mio.fhirProject.App;
 
 
 public class CMainWindow extends JFrame 
@@ -64,6 +67,11 @@ public class CMainWindow extends JFrame
 	private void createPatientPanel()
 	{
 		this.patientPanel.setLayout(new GridLayout(1,1));
+		Vector<String> columns = new Vector<String>();
+		fillPatientsColomn(columns);
+		this.allPatientsTable = new JTable(App.obs.getPatients(), columns);
+		
+		
 		this.patientPanel.add(this.allPatientsTable);
 	}
 	
@@ -89,6 +97,17 @@ public class CMainWindow extends JFrame
 	{
 		this.reportPanel.setLayout(new GridLayout(1,1));
 		this.reportPanel.add(this.allReportTable);
+	}
+	
+	private void fillPatientsColomn(Vector<String> in)
+	{
+		in.add("Title");
+		in.add("Familyname");
+		in.add("Firstname");
+		in.add("Country");
+		in.add("City");
+		in.add("ZIP");
+		in.add("Street");
 	}
 	
 	/*
