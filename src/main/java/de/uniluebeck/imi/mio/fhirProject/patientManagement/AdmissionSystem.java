@@ -1,5 +1,12 @@
 package de.uniluebeck.imi.mio.fhirProject.patientManagement;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -122,7 +129,7 @@ public class AdmissionSystem {
 		Encounter visit = new Encounter();
 		
 		// big encounter to record the whole visit of the patient
-		visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000));
+		visit.addIdentifier("http://kh-hh.de/mio/encounters","Visit-"+(int)(Math.random()*1000)+ " - " + patient.getNameFirstRep());
 		visit.setStatus(EncounterStateEnum.PLANNED);
 		visit.setClassElement(admParams.admissionClass);
 		
@@ -167,6 +174,7 @@ public class AdmissionSystem {
 		beginningEncounter.setStatus(EncounterStateEnum.IN_PROGRESS);
 		beginningEncounter.setClassElement(admParams.admissionClass);
 		beginningEncounter.setLength(encounterDuration);
+		beginningEncounter.addIdentifier("http://kh-hh.de/mio/encounters","Admission-"+(int)(Math.random()*1000)+ " - " + admission.patient.getNameFirstRep());
 
 		//beginningEncounter.setReason(EncounterReasonCodesEnum.valueOf(admParams.diagnosisICD));
 		beginningEncounter.setSubject(admission.visit.getSubject());
@@ -224,8 +232,9 @@ public class AdmissionSystem {
         IdDt idNonVersioned = new IdDt(elementSpecificId+"/"+id.getResourceType()+"/"+idPart);
 
         // Set ID on local encounter object
-        encounter.setId(idNonVersioned);         
-        
+        encounter.setId(idNonVersioned);     
+     
+      
         return idNonVersioned;
     }   
     
