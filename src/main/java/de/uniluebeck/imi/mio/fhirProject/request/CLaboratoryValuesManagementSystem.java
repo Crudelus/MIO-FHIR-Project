@@ -10,42 +10,79 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.Event;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.Item;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 
 public class CLaboratoryValuesManagementSystem {
-	static String serverBase = "http://fhirtest.uhn.ca/base";
 
+	//static FhirContext ctx;
+	static String serverBase = "http://fhirtest.uhn.ca/base";
 	private IGenericClient client;
 	
-	public DiagnosticOrder newOrder(FhirContext ctx, IdDt patient, IdDt orderer, NarrativeDt text, 
-			CodeableConceptDt code, CodeableConceptDt bodysite){
+	//FUNCTION: create a new DiagnosticOrder
+	//INPUT: ctx, patID, ordererID usw. 
+	public IdDt newOrder(FhirContext ctx, IdDt patient, IdDt orderer, IdDt encounter, List<Event> events, 
+			List<Item> items){
+		
+		this.client = ctx.newRestfulGenericClient(serverBase);
+		
+		DiagnosticOrder order = new DiagnosticOrder();
+		
+		//need to get the information from the view form
+		order.addIdentifier();
+		order.getSubject().setReference(patient);
+		order.getOrderer().setReference(orderer);
+		order.setEvent(events);
+		order.setItem(items);
+		order.getEncounter().setReference(encounter);
+		order.setStatus(DiagnosticOrderStatusEnum.REQUESTED);
+		//order.addItem().setCode(code); //not sure
+		//order.addItem().setBodySite(bodysite);
+		//order.setSubject(new ResourceReferenceDt(patient));
+
+		//create in server
+		client.create().resource(order).prettyPrint().encodedJson().execute();
+	
+		return order.getId();
+	}
+	
+	//not sure if we need this... 
+	public DiagnosticOrder updateOrder(FhirContext ctx, IdDt orderId, DiagnosticOrder orderChange){
 		
 		this.client = ctx.newRestfulGenericClient(serverBase);
 
-		//IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+		//DiagnosticOrder order = client.read(DiagnosticOrder.class, orderId);
+		/*Patient patient = client.read(Patient.class, order.getSubject().getReference().getValue());
 		
-		DiagnosticOrder order = new DiagnosticOrder();
-		order.setId(patient);
-		// need to get the information from the view form
-		//order.setClinicalNotes();
-		order.setOrderer(new ResourceReferenceDt(orderer));		//Edna		
-		order.setStatus(DiagnosticOrderStatusEnum.REQUESTED);
-		order.setText(text);		//von der App
-		order.setSubject(new ResourceReferenceDt(patient));
-		//order.setItem(item);		//LOINC?
-		order.addItem().setCode(code);
-		order.addItem().setBodySite(bodysite);
+		System.out.println(patient.isEmpty());
+		String patientName = patient.getName().get(0).getGivenAsSingleString() + " "+ patient.getName().get(0).getFamilyAsSingleString();
+		System.out.println("updating the DiagnosticOrder with ID: '" + order.getId().getIdPart()
+				+"' for the patient: "+patientName);
+		System.out.println("");*/
+		//new values : change 된것 만 바꾸려면?
 		
-		//create in server
-		client.create().resource(order).prettyPrint().encodedJson().execute();
-		return order;
+		//update in server
+		//if(order.getStatus().getValue().equalsIgnoreCase("requested")){
+			client.update().resource(orderChange).execute();
+		//	System.out.println("Order ID: " + order.getId().getIdPart() + " Updated...");
+		//}else{
+		//	System.out.println("This order cannot be updated.... Reason: " + order.getStatus().getValueAsString());
+		//}
+		
+		return orderChange;
 	}
-	
 	/*
 	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(FhirContext ctx, IdDt orderId){
 		this.client = ctx.newRestfulGenericClient(serverBase);
@@ -63,13 +100,22 @@ public class CLaboratoryValuesManagementSystem {
 	}
 	*/
 	
-	public DiagnosticOrder checkOrder(FhirContext ctx, IdDt orderId){
+	
+	// checkOrder function: gets orderId and patientId as input 
+	// and returns the DiagnosticOrder Resource which has the same orderId and patientId
+	public DiagnosticOrder checkOrder(FhirContext ctx, IdDt orderId, IdDt patientId){
 		this.client = ctx.newRestfulGenericClient(serverBase);
+		
 		DiagnosticOrder order;
+		//search for all DiagnosticOrders on the server with patientId
 		Bundle response = client.search()
 				.forResource(DiagnosticOrder.class)
-				.where(DiagnosticOrder.IDENTIFIER.exactly().identifier(orderId.getValue()))
+				.where(DiagnosticOrder.SUBJECT.hasId(patientId))
 				.execute();
+
+		System.out.println(response.size()+" DiagnosticOrders are found for patID " + patientId);
+		
+		//find the right DiagnosticOrder with orderId
 		if(!response.isEmpty()){
 			order = (DiagnosticOrder) response.getResourceById(orderId);
 			return order;
@@ -78,28 +124,42 @@ public class CLaboratoryValuesManagementSystem {
 		return null;
 	}
 	
-	public DiagnosticReport getResult(FhirContext ctx, IdDt patient, IdDt orderId){
+	// getResult Function: gets orderID and patientID as input
+	// and returns the DiagnosticResult Resource if it exists. 
+	public DiagnosticReport getResult(FhirContext ctx, IdDt orderId, IdDt patient){
 		this.client = ctx.newRestfulGenericClient(serverBase);
-		DiagnosticReport report;
-		Bundle response = client.search()
-			      .forResource(DiagnosticReport.class)
-			      .where(DiagnosticReport.SUBJECT.hasId(patient))
-			      .and(DiagnosticReport.REQUEST.hasId(orderId))
-			      .execute();
+		DiagnosticOrder order = checkOrder(ctx, orderId, patient);
 		
-		// return the DiagnosticReport with reference DiagnositcOrder Id == orderId
-		if(!response.isEmpty()){
+		//if the DiagnosticOrder has the status completed
+		if(order.getStatus().getValueAsEnum().equals(DiagnosticOrderStatusEnum.COMPLETED)){
+			DiagnosticReport report;
+			Bundle response = client.search()
+				      .forResource(DiagnosticReport.class)
+				      .where(DiagnosticReport.SUBJECT.hasId(patient)) //hasId(orderId))
+				      .execute();
 			
-			List<DiagnosticReport> reportList = response.getResources(DiagnosticReport.class);
+			System.out.println(response.size() + " Reports are found for patID " + patient.getIdPart());
 			
-			for(int i=0;i<reportList.size();i++){
-				if(reportList.get(i).getRequestDetail() == orderId){
-					report = reportList.get(i);
-					return report;
+			// return the DiagnosticReport with reference DiagnositcOrder Id == orderId
+			if(!response.isEmpty()){
+				List<DiagnosticReport> reportList = response.getResources(DiagnosticReport.class);
+
+				for(int i=0;i<reportList.size();i++){
+					
+					List<ResourceReferenceDt> requests = reportList.get(i).getRequestDetail();
+					
+					for(int j=0;j<requests.size();j++){
+						if(requests.get(j).getReference().getIdPart()==orderId.getIdPart()){
+							return reportList.get(i);
+						}
+					}
 				}
-			}
-		}
+			} //end if
+		} //end if
+		
+		// if not return null...
 		return null;
 	}
+
 	
 }
