@@ -116,7 +116,8 @@ public class MIODeviceSystem implements IDevice {
 	 * .model.primitive.IdDt)
 	 */
 	@Override
-	public Device getDevice(IdDt deviceId) {
+	public Device getDevice(IdDt deviceId)
+	{
 		Device dev = communicator.getDevice(deviceId);
 		return dev;
 	}

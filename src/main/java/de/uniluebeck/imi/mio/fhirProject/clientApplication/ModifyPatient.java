@@ -5,8 +5,10 @@ import java.util.List;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import de.uniluebeck.imi.mio.fhirProject.App;
 
 public class ModifyPatient
 {
@@ -114,6 +116,14 @@ public class ModifyPatient
 		{
 			return false;
 		}
+	}
+	
+	public static boolean changeMaritalStatus(IdDt patient, MaritalStatusCodesEnum newState)
+	{
+		Patient tmp = GetPatient.getSpecialPatient(patient);
+		tmp.setMaritalStatus(newState);
+		App.pms.updatePatient(tmp);
+		return true;
 	}
 	
 	
