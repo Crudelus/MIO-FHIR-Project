@@ -10,96 +10,56 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.resource.Order;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.Event;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder.Item;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 
 public class CLaboratoryValuesManagementSystem {
 	static String serverBase = "http://fhirtest.uhn.ca/base";
-
-	private IGenericClient client;
+	static FhirContext ctx = new FhirContext();
+	private IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 	
-	public DiagnosticOrder newOrder(FhirContext ctx, IdDt patient, IdDt orderer, NarrativeDt text, 
-			CodeableConceptDt code, CodeableConceptDt bodysite){
+	public String newOrder(IdDt patient, IdDt orderer, IdDt target, IdDt encounter, IdDt reason){
 		
-		this.client = ctx.newRestfulGenericClient(serverBase);
-
-		//IGenericClient client = ctx.newRestfulGenericClient(serverBase);
+		DateTimeDt date = new DateTimeDt();
 		
-		DiagnosticOrder order = new DiagnosticOrder();
-		order.setId(patient);
-		// need to get the information from the view form
-		//order.setClinicalNotes();
-		order.setOrderer(new ResourceReferenceDt(orderer));		//Edna		
-		order.setStatus(DiagnosticOrderStatusEnum.REQUESTED);
-		order.setText(text);		//von der App
-		order.setSubject(new ResourceReferenceDt(patient));
-		//order.setItem(item);		//LOINC?
-		order.addItem().setCode(code);
-		order.addItem().setBodySite(bodysite);
+		List<Event> events = new ArrayList<Event>();
+		Event event = new Event();
+		event.getActor().setReference(orderer);
+		event.setDateTime(date.withCurrentTime());
+		event.setStatus(DiagnosticOrderStatusEnum.REQUESTED);
+		events.add(event);
+		
+		//set values for diagnosticOrder: only for documentation 
+		DiagnosticOrder diag_order = new DiagnosticOrder();
+		//need to get the information from the view form
+		diag_order.setSubject(new ResourceReferenceDt().setReference(patient));
+		diag_order.setOrderer(new ResourceReferenceDt().setReference(orderer));
+		diag_order.setEvent(events);
+		diag_order.setEncounter(new ResourceReferenceDt().setReference(encounter));
+		diag_order.setStatus(DiagnosticOrderStatusEnum.REQUESTED);
+		
+		//set values for Order: actual order
+		Order order = new Order();
+		order.addDetail().setResource(diag_order);
+		order.setSource(new ResourceReferenceDt().setReference(orderer));
+		order.setSubject(new ResourceReferenceDt().setReference(patient));
+		order.setTarget(new ResourceReferenceDt().setReference(target));
+		order.setDate(date.withCurrentTime());
+		order.setReason(reason);
 		
 		//create in server
 		client.create().resource(order).prettyPrint().encodedJson().execute();
-		return order;
-	}
-	
-	/*
-	public BoundCodeDt<DiagnosticOrderStatusEnum> checkOrder(FhirContext ctx, IdDt orderId){
-		this.client = ctx.newRestfulGenericClient(serverBase);
-		BoundCodeDt<DiagnosticOrderStatusEnum> status;
-		Bundle response = client.search()
-			      .forResource(DiagnosticReport.class)
-			      .where(DiagnosticReport.IDENTIFIER.equals(orderId))
-			      .execute();
-		if(response.isEmpty()){
-			
-		}
-		
-		return status;
-		
-	}
-	*/
-	
-	public DiagnosticOrder checkOrder(FhirContext ctx, IdDt orderId){
-		this.client = ctx.newRestfulGenericClient(serverBase);
-		DiagnosticOrder order;
-		Bundle response = client.search()
-				.forResource(DiagnosticOrder.class)
-				.where(DiagnosticOrder.IDENTIFIER.exactly().identifier(orderId.getValue()))
-				.execute();
-		if(!response.isEmpty()){
-			order = (DiagnosticOrder) response.getResourceById(orderId);
-			return order;
-		}
-		
-		return null;
-	}
-	
-	public DiagnosticReport getResult(FhirContext ctx, IdDt patient, IdDt orderId){
-		this.client = ctx.newRestfulGenericClient(serverBase);
-		DiagnosticReport report;
-		Bundle response = client.search()
-			      .forResource(DiagnosticReport.class)
-			      .where(DiagnosticReport.SUBJECT.hasId(patient))
-			      .and(DiagnosticReport.REQUEST.hasId(orderId))
-			      .execute();
-		
-		// return the DiagnosticReport with reference DiagnositcOrder Id == orderId
-		if(!response.isEmpty()){
-			
-			List<DiagnosticReport> reportList = response.getResources(DiagnosticReport.class);
-			
-			for(int i=0;i<reportList.size();i++){
-				if(reportList.get(i).getRequestDetail() == orderId){
-					report = reportList.get(i);
-					return report;
-				}
-			}
-		}
-		return null;
+		client.create().resource(diag_order).prettyPrint().encodedJson().execute();
+		String result = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(order);
+		return result;
 	}
 	
 }
