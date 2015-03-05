@@ -9,6 +9,7 @@ import de.uniluebeck.imi.mio.fhirProject.patientManagement.AdmissionParameters;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 //import ca.uhn.fhir.model.dstu.resource.Claim.Patient;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -301,4 +302,30 @@ public class Observations implements IObservation {
 		
 		return vec;
 	}
+	
+	
+	
+public List<Composition> getComposition(IdDt patient) {
+		
+		Bundle response = client.search().forResource(Composition.class).execute();		
+		
+		List<Composition> complist = response.getResources(Composition.class);
+		List<Composition> newComplist = null;
+		
+		for(Composition diag : complist){
+								
+				
+				System.out.println(diag.getSubject().getReference().getIdPart());
+				if(patient.toString().equals(diag.getSubject().getReference().getIdPart())){
+										
+					newComplist.add(diag);																								
+					
+				}						
+			}
+		
+		return newComplist;
+	}
+
+	
 }
+
