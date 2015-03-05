@@ -70,35 +70,48 @@ public class CMainWindow extends JFrame
 		Vector<String> columns = new Vector<String>();
 		fillPatientsColomn(columns);
 		this.allPatientsTable = new JTable(App.obs.getPatients(), columns);
-		
-		
 		this.patientPanel.add(this.allPatientsTable);
+		this.patientPanel.setVisible(true);
 	}
 	
 	private void createEncounterPanel()
 	{
 		this.encounterPanel.setLayout(new GridLayout(1,1));
 		this.encounterPanel.add(this.allEncounterTable);
+		
+		this.encounterPanel.setVisible(true);
 	}
 	
 	private void createObservationPanel()
 	{
 		this.observationPanel.setLayout(new GridLayout(1,1));
 		this.observationPanel.add(this.allObservationTable);
+		
+		this.observationPanel.setVisible(true);
 	}
 	
 	private void createDevicePanel()
 	{
 		this.devicePanel.setLayout(new GridLayout(1,1));
 		this.devicePanel.add(this.allDevicesTable);
+		
+		this.devicePanel.setVisible(true);
 	}
 	
 	private void createReportPanel()
 	{
 		this.reportPanel.setLayout(new GridLayout(1,1));
 		this.reportPanel.add(this.allReportTable);
+		Vector<String> colomns = new Vector<String>();
+		this.fillReportsColomn(colomns);
+		this.allReportTable = new JTable(App.rms.getAllDiagnosticReportsAsVector(App.ctx), colomns);
+		
+		this.reportPanel.setVisible(true);
 	}
 	
+	/*
+	 * Fills the Vector with the Colomns for the patients
+	 */
 	private void fillPatientsColomn(Vector<String> in)
 	{
 		in.add("Title");
@@ -108,6 +121,20 @@ public class CMainWindow extends JFrame
 		in.add("City");
 		in.add("ZIP");
 		in.add("Street");
+	}
+	
+	/*
+	 * Tills the vector with the colomns fot the reports
+	 */
+	private void fillReportsColomn(Vector<String> in)
+	{
+		in.add("ID");
+		in.add("Date");
+		in.add("Title");
+		in.add("Patient-ID");
+		in.add("Diagnostic");
+		in.add("Curve");
+		in.add("Status");
 	}
 	
 	/*
