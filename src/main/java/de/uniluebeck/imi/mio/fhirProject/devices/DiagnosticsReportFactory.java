@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
@@ -46,7 +47,7 @@ public class DiagnosticsReportFactory {
 		lab.setStatus(DiagnosticReportStatusEnum.FINAL);
 		
 		NarrativeDt ndt = new NarrativeDt();
-		ndt.setDiv("Simon ist cool");
+		ndt.setDiv("Leucocytes and hemoglobin values.");
 		ndt.setStatus(NarrativeStatusEnum.GENERATED);
 		lab.setText(ndt);
 
@@ -90,7 +91,6 @@ public class DiagnosticsReportFactory {
 	}
 
 	public IdDt newDeviceObservationReport(IdDt deviceId, IdDt diagOrderId, IdDt patId, IdDt performer) {
-		
 		
 		DeviceObservationReport vitPar = new DeviceObservationReport();
 		vitPar.setSubject(new ResourceReferenceDt(patId));

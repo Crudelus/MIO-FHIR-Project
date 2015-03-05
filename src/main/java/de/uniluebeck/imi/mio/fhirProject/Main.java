@@ -144,7 +144,7 @@ public class Main
 	    Patient scenarioPatient = scenarioAdmission.patient;
 	    
 
-	    // Group 1: Create observation for patient, get nurse
+	    // Group 3: Create observation for patient, get nurse
 	    // encounter is known from admission result 
 	    List<Practitioner> practitioners = patientManagement.getNurseList();
 	    // < Display on GUI for selection> 
