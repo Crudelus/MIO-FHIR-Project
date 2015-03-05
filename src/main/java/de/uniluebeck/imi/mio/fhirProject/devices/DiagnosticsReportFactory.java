@@ -135,6 +135,41 @@ public class DiagnosticsReportFactory {
 			
 			vitPar.addVirtualDevice().addChannel().setMetric(metric);
 
+			MethodOutcome outDevFet = communicator.createRessourceOnServer(vitPar);
+			 
+			return outDevFet.getId();
+			
+		case "ECG":
+			
+			// heart rate
+			QuantityDt bpm1 = new QuantityDt();
+			bpm1.setSystem("http://unitsofmeasure.org");
+			bpm1.setUnits("{Beats}/min");
+			bpm1.setCode("{Beats}/min");
+			bpm1.setValue((int) (Math.random() * (190 - 70) + 70));
+
+			Observation obvBpm1 = new Observation();
+			List<ResourceReferenceDt> perf1 = new ArrayList<ResourceReferenceDt>();
+			perf1.add(0, new ResourceReferenceDt(performer));
+			obvBpm1.setPerformer(perf1);
+			obvBpm1.setName(new CodeableConceptDt("http://loinc.org", "8867-4")
+					.setText("Heart Rate [Beats per minute]"));
+
+			obvBpm1.setStatus(ObservationStatusEnum.FINAL);
+			obvBpm1.setReliability(ObservationReliabilityEnum.OK);
+			obvBpm1.setValue(bpm1);
+
+			MethodOutcome outBpm1 = communicator.createRessourceOnServer(obvBpm1);
+			
+			VirtualDeviceChannelMetric heartRate1 = new VirtualDeviceChannelMetric();
+			
+			heartRate1.setObservation(new ResourceReferenceDt(outBpm1.getId()));
+			
+			ArrayList<VirtualDeviceChannelMetric> metric1 = new ArrayList<VirtualDeviceChannelMetric>();
+			metric1.add(heartRate1);
+			
+			vitPar.addVirtualDevice().addChannel().setMetric(metric1);
+
 			MethodOutcome outDev1 = communicator.createRessourceOnServer(vitPar);
 			 
 			return outDev1.getId();
