@@ -69,6 +69,17 @@ public class MIODeviceSystem implements IDevice {
 		herbert.setModel("Sphygmomanometer H-1337");
 		herbert.setOwner(new ResourceReferenceDt(patSys.getIMC()));
 		herbert.setLocation(patSys.getIMC().getLocation().get(0));
+		
+		/*
+		 * Create ECG; add attributes
+		 */
+		Device ecg = new Device();
+		ecg.setUdi("ecg-001");
+		ecg.setType(new CodeableConceptDt("MIO-KH-HH", "ECG"));
+		ecg.setManufacturer("Draeger");
+		ecg.setModel("ECG-Master 5000");
+		ecg.setOwner(new ResourceReferenceDt(patSys.getBirthStation()));
+		ecg.setLocation(patSys.getNICU().getLocation().get(0));
 			
 		/*
 		 * Create Devices on Server

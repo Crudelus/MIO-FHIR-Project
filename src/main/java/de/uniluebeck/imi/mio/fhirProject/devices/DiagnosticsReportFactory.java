@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
@@ -46,7 +47,7 @@ public class DiagnosticsReportFactory {
 		lab.setStatus(DiagnosticReportStatusEnum.FINAL);
 		
 		NarrativeDt ndt = new NarrativeDt();
-		ndt.setDiv("Simon ist cool");
+		ndt.setDiv("Leucocytes and hemoglobin values.");
 		ndt.setStatus(NarrativeStatusEnum.GENERATED);
 		lab.setText(ndt);
 
@@ -91,7 +92,6 @@ public class DiagnosticsReportFactory {
 
 	public IdDt newDeviceObservationReport(IdDt deviceId, IdDt diagOrderId, IdDt patId, IdDt performer) {
 		
-		
 		DeviceObservationReport vitPar = new DeviceObservationReport();
 		vitPar.setSubject(new ResourceReferenceDt(patId));
 		vitPar.setSource(new ResourceReferenceDt(deviceId));
@@ -134,6 +134,41 @@ public class DiagnosticsReportFactory {
 			metric.add(heartRate);
 			
 			vitPar.addVirtualDevice().addChannel().setMetric(metric);
+
+			MethodOutcome outDevFet = communicator.createRessourceOnServer(vitPar);
+			 
+			return outDevFet.getId();
+			
+		case "ECG":
+			
+			// heart rate
+			QuantityDt bpm1 = new QuantityDt();
+			bpm1.setSystem("http://unitsofmeasure.org");
+			bpm1.setUnits("{Beats}/min");
+			bpm1.setCode("{Beats}/min");
+			bpm1.setValue((int) (Math.random() * (190 - 70) + 70));
+
+			Observation obvBpm1 = new Observation();
+			List<ResourceReferenceDt> perf1 = new ArrayList<ResourceReferenceDt>();
+			perf1.add(0, new ResourceReferenceDt(performer));
+			obvBpm1.setPerformer(perf1);
+			obvBpm1.setName(new CodeableConceptDt("http://loinc.org", "8867-4")
+					.setText("Heart Rate [Beats per minute]"));
+
+			obvBpm1.setStatus(ObservationStatusEnum.FINAL);
+			obvBpm1.setReliability(ObservationReliabilityEnum.OK);
+			obvBpm1.setValue(bpm1);
+
+			MethodOutcome outBpm1 = communicator.createRessourceOnServer(obvBpm1);
+			
+			VirtualDeviceChannelMetric heartRate1 = new VirtualDeviceChannelMetric();
+			
+			heartRate1.setObservation(new ResourceReferenceDt(outBpm1.getId()));
+			
+			ArrayList<VirtualDeviceChannelMetric> metric1 = new ArrayList<VirtualDeviceChannelMetric>();
+			metric1.add(heartRate1);
+			
+			vitPar.addVirtualDevice().addChannel().setMetric(metric1);
 
 			MethodOutcome outDev1 = communicator.createRessourceOnServer(vitPar);
 			 
