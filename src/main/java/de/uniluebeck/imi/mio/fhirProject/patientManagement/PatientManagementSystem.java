@@ -183,7 +183,8 @@ public class PatientManagementSystem implements IPatientManagementSystem{
 	}
 
 	@Override
-	public boolean updatePatient(Patient patient) {
+	public boolean updatePatient(Patient patient)
+	{
 		
 		MyPatient.updatePatient(client, patient);
 		
