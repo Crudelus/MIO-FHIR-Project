@@ -28,7 +28,7 @@ import de.uniluebeck.imi.mio.fhirProject.patientManagement.IPatientManagementSys
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientCreationParameters;
 import de.uniluebeck.imi.mio.fhirProject.patientManagement.PatientManagementSystem;
 
-public class Main
+public class hardcodedMain
 {
 	public static void main(String[] args)
 	{

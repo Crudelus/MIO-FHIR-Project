@@ -26,7 +26,7 @@ public class GetPatient
 	
 	public static List<Composition> getAllDoctorLettersOfASpecialPatient(IdDt patient)
 	{
-		return App.obs.getCompositions(patient);
+		return  null;//App.obs.getCompositions(patient); Hatte einen Error
 	}
 	
 	
