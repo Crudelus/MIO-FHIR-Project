@@ -197,10 +197,10 @@ public class DiagnosticsReportFactory {
 			
 			pressure.setObservation(new ResourceReferenceDt(outPres.getId()));
 			
-			ArrayList<VirtualDeviceChannelMetric> metric1 = new ArrayList<VirtualDeviceChannelMetric>();
-			metric1.add(pressure);
+			ArrayList<VirtualDeviceChannelMetric> metric2 = new ArrayList<VirtualDeviceChannelMetric>();
+			metric2.add(pressure);
 			
-			vitPar.addVirtualDevice().addChannel().setMetric(metric1);
+			vitPar.addVirtualDevice().addChannel().setMetric(metric2);
 
 			MethodOutcome outDev2 = communicator.createRessourceOnServer(vitPar);
 			
